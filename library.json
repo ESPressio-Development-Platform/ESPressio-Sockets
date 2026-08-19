@@ -1,0 +1,37 @@
+{
+    "name": "ESPressio-Sockets",
+    "description": "Socket-based ESPressio transports for ESP32, including UDP, TCP, TLS and WebSocket Event Transport adapters.",
+    "keywords": "esp32,sockets,udp,tcp,tls,websocket,event,transport,network,espressio",
+    "authors": {
+        "name": "Flowduino",
+        "maintainer": true,
+        "url": "https://flowduino.com"
+    },
+    "build": {
+        "flags": [
+            "-DESPRESSIO_SOCKETS"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Flowduino/ESPressio-Sockets.git"
+    },
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "dependencies": [
+        {
+            "owner": "links2004",
+            "name": "WebSockets",
+            "version": "^2.3.6",
+            "platforms": "espressif32"
+        },
+        {
+            "owner": "knolleary",
+            "name": "PubSubClient",
+            "version": "^2.8",
+            "platforms": "espressif32"
+        }
+    ]
+}
