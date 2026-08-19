@@ -1,7 +1,7 @@
 #pragma once
 
 #if !__has_include(<ESPressio_EventTransport.hpp>)
-#error "WebSocketClientEventTransport requires ESPressio Event >= 5.5.0."
+#error "WebSocketClientEventTransport requires ESPressio Event >= 5.6.2 < 6.0.0."
 #endif
 
 #if !__has_include(<WebSocketsClient.h>)
