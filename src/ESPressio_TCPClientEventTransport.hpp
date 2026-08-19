@@ -1,7 +1,7 @@
 #pragma once
 
 #if !__has_include(<ESPressio_EventTransport.hpp>)
-#error "TCPClientEventTransport requires ESPressio Event >= 5.4.0."
+#error "TCPClientEventTransport requires ESPressio Event >= 5.5.0."
 #endif
 
 #include <array>

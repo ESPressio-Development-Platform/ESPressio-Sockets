@@ -12,6 +12,20 @@ Versioning](https://semver.org/).
 > had little or no release-note detail, the entry is intentionally terse
 > rather than inferring unsupported intent.
 
+## [0.2.1] - 2026-08-19
+
+### Changed
+
+- Updated all optional socket Event Transport adapters to require ESPressio Event 5.5.0 or newer.
+- Updated Event Transport documentation and PlatformIO dependency examples for ESPressio Event 5.5.0.
+- Bumped ESPressio Sockets package/version metadata to 0.2.1.
+
+### Compatibility
+
+- No UDP, TCP, TLS, WebSocket, MQTT, or System Clock synchronization interfaces are changed by this patch release.
+- Timing integration remains opt-in and unchanged.
+- Core Sockets usage remains independent of ESPressio Event.
+
 ## \[0.2.0\] - 2026-08-19
 
 ### Added
