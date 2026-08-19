@@ -6,11 +6,11 @@ ESPressio Sockets provides IP/socket-oriented communication adapters separately 
 
 ## Latest Stable Version
 
-The initial version is **0.1.0**.
+The current repository version is **0.2.0**.
 
 ## Compatibility
 
-ESPressio Sockets `0.1.0` targets the **ESP32 family under Arduino-ESP32** and uses C++17.
+ESPressio Sockets `0.2.0` targets the **ESP32 family under Arduino-ESP32** and uses C++17.
 
 The library uses Arduino-ESP32 native networking classes for UDP, TCP and TLS. WebSocket support is provided through the mature Links2004 `arduinoWebSockets` library.
 
@@ -570,7 +570,7 @@ build_flags =
     -std=gnu++17
 
 lib_deps =
-    flowduino/ESPressio-Sockets@^0.1.0
+    flowduino/ESPressio-Sockets@^0.2.0
     flowduino/ESPressio-Event@^5.4.0
     links2004/WebSockets@^2.3.6
     knolleary/PubSubClient@^2.8
@@ -613,7 +613,7 @@ This makes the transport layer composable without turning one library into a col
 
 # Summary
 
-ESPressio Sockets `0.1.0` establishes the socket/network transport layer of the ESPressio ecosystem.
+ESPressio Sockets `0.2.0` provides the socket/network transport layer of the ESPressio ecosystem.
 
 The initial release provides:
 
@@ -635,3 +635,252 @@ The initial release provides:
 The architectural boundary is deliberate:
 
 **ESPressio Event decides which Events travel. ESPressio Sockets moves them using socket/network protocols. Hardware-radio transports remain in their own ESPressio libraries.**
+
+# System Clock Synchronization — 0.2.0
+
+ESPressio Sockets `0.2.0` adds opt-in network implementations for the transport-independent System Clock synchronization API in ESPressio Timing `2.2.0`.
+
+The synchronization layer is deliberately separate from Event Transport and is **not** included by the normal:
+
+```cpp
+#include <ESPressio_Sockets.hpp>
+```
+
+Applications that need socket-based System Clock synchronization include:
+
+```cpp
+#include <ESPressio_SocketClockSynchronization.hpp>
+```
+
+and provide:
+
+```text
+ESPressio Timing >= 2.2.0
+```
+
+The ownership boundary remains:
+
+```text
+ESPressio Timing
+    |
+    +-- SystemClock
+    +-- ClockSynchronizationSample
+    +-- offset/delay calculation
+    +-- clock discipline
+    +-- step/slew policy
+    +-- synchronization state
+    +-- Observer notifications
+           |
+           | IClockSynchronizationTarget
+           v
+ESPressio Sockets
+    |
+    +-- UDP exchange
+    +-- TCP exchange
+    +-- WebSocket exchange
+    +-- SNTP external reference
+```
+
+Socket transports do not implement a second clock discipline. They only acquire synchronization observations and submit them into ESPressio Timing.
+
+## Common four-timestamp protocol
+
+UDP, TCP and WebSocket request/response synchronization use the same four timestamps:
+
+```text
+Client                             Reference
+
+T1 request transmit  ------------------>
+                                    T2 request receive
+                                    T3 response transmit
+T4 response receive  <------------------
+```
+
+The completed exchange is submitted as:
+
+```cpp
+Timing::ClockSynchronizationSample<
+    Timing::ClockTick
+>
+```
+
+so Timing owns the normal calculations:
+
+```text
+round-trip delay = (T4 - T1) - (T3 - T2)
+offset           = ((T2 - T1) + (T3 - T4)) / 2
+```
+
+This also means all existing Timing Observer callbacks and the optional `SystemClockEventBridge` continue to work unchanged.
+
+## UDPClockSynchronizer
+
+`UDPClockSynchronizer` is the preferred socket transport for precision synchronization because it avoids TCP retransmission and stream-buffering behavior.
+
+A reference device can use:
+
+```cpp
+Sockets::UDPClockSynchronizationConfig config;
+config.Mode =
+    Sockets::SocketClockSynchronizationMode::Reference;
+config.LocalPort = 45100;
+
+synchronizer.Initialize(config);
+```
+
+A client uses:
+
+```cpp
+Sockets::UDPClockSynchronizationConfig config;
+config.Mode =
+    Sockets::SocketClockSynchronizationMode::Client;
+config.LocalPort = 45101;
+config.ReferenceAddress =
+    IPAddress(192, 168, 1, 50);
+config.ReferencePort = 45100;
+config.SynchronizationIntervalMilliseconds = 5000;
+```
+
+The client periodically performs the full request/response exchange and submits the resulting four timestamps into ESPressio Timing.
+
+### UDP authoritative broadcast
+
+A reference can also periodically broadcast its current System Clock:
+
+```cpp
+config.Mode =
+    Sockets::SocketClockSynchronizationMode::Reference;
+config.EnableAuthoritativeBroadcast = true;
+config.BroadcastIntervalMilliseconds = 5000;
+```
+
+Clients listening on the same UDP port can consume these one-way synchronization observations.
+
+One-way broadcast deliberately cannot compensate for network latency, so it is intended for lower-overhead group synchronization where the stronger request/response measurement is unnecessary.
+
+### UDP multicast
+
+The same authoritative mode can use an IPv4 multicast group:
+
+```cpp
+config.EnableAuthoritativeMulticast = true;
+config.MulticastGroup =
+    IPAddress(239, 45, 10, 1);
+config.MulticastPort = 45100;
+```
+
+This is useful for synchronizing a defined group of devices without local-network-wide broadcast traffic.
+
+## TCP Clock Synchronization
+
+Version 0.2.0 adds:
+
+```cpp
+TCPClockSynchronizationClient
+TCPClockSynchronizationServer
+```
+
+The server can service multiple clients using the same versioned ESPressio socket frame already used by TCP Event Transport.
+
+Client configuration:
+
+```cpp
+Sockets::TCPClockSynchronizationClientConfig config;
+config.Host = "192.168.1.50";
+config.Port = 45110;
+config.SynchronizationIntervalMilliseconds = 5000;
+```
+
+TCP remains a valid convenience transport where a connection is already useful, although UDP is generally preferable when minimizing network/scheduler jitter is the priority.
+
+## WebSocket Clock Synchronization
+
+Version 0.2.0 also adds:
+
+```cpp
+WebSocketClockSynchronizationClient
+WebSocketClockSynchronizationServer
+```
+
+The synchronization messages are transferred as binary WebSocket messages.
+
+The client supports both:
+
+```text
+ws://
+wss://
+```
+
+using the same Links2004 WebSockets dependency already used by ESPressio Sockets Event Transport.
+
+This is particularly useful when the System Clock authority is exposed through a WebSocket-capable network endpoint rather than raw UDP/TCP.
+
+## SNTPClockSyncProvider
+
+`SNTPClockSyncProvider` uses the ESP-IDF/lwIP SNTP implementation as an external absolute-time source.
+
+Example:
+
+```cpp
+Sockets::SNTPClockSyncProvider provider;
+
+Sockets::SNTPClockSyncProviderConfig config;
+config.Server = "pool.ntp.org";
+config.UpdateIntervalMilliseconds = 3600000;
+
+provider.Initialize(config);
+```
+
+When ESP-IDF reports a successful SNTP synchronization, the received Unix reference time is submitted into ESPressio Timing rather than replacing the ESPressio clock-discipline architecture.
+
+The provider therefore establishes the ESPressio System Clock in the Unix epoch domain while preserving:
+
+```text
+Timing step/slew policy
+Timing synchronization state
+Timing accepted/rejected sample accounting
+Timing Observer callbacks
+SystemClockEventBridge integration
+```
+
+The SNTP callback does not expose the underlying NTP four packet timestamps, so this provider represents the externally synchronized SNTP time as a zero-duration reference observation. Use UDP request/response between ESPressio devices when the ESPressio four-timestamp round-trip measurement itself is required.
+
+Only one active `SNTPClockSyncProvider` is supported because the underlying ESP-IDF SNTP synchronization callback is process-global.
+
+## Timing dependency remains opt-in
+
+The Clock Synchronization headers are not included by `ESPressio_Sockets.hpp`.
+
+Therefore a project using only socket primitives or Event Transport does not need ESPressio Timing solely because the synchronization implementations exist in the repository.
+
+Conversely, a project using:
+
+```cpp
+#include <ESPressio_SocketClockSynchronization.hpp>
+```
+
+must supply ESPressio Timing `>=2.2.0`.
+
+## Synchronization examples
+
+Version 0.2.0 adds:
+
+```text
+examples/
+├── UDPClockSynchronization/
+│   └── UDPClockSynchronization.ino
+├── UDPClockBroadcast/
+│   └── UDPClockBroadcast.ino
+├── TCPClockSynchronizationClient/
+│   └── TCPClockSynchronizationClient.ino
+├── TCPClockSynchronizationServer/
+│   └── TCPClockSynchronizationServer.ino
+├── WebSocketClockSynchronizationClient/
+│   └── WebSocketClockSynchronizationClient.ino
+├── WebSocketClockSynchronizationServer/
+│   └── WebSocketClockSynchronizationServer.ino
+└── SNTPClockSynchronization/
+    └── SNTPClockSynchronization.ino
+```
+
+These are intentionally separate from the existing Event Transport examples.

@@ -16,6 +16,10 @@
  *   ESPressio_WebSocketServerEventTransport.hpp
  *   ESPressio_MQTTEventTransport.hpp
  *
- * This keeps ESPressio Event/Serializable dependencies opt-in at the
- * consuming-code level.
+ * Timing synchronization is likewise opt-in through:
+ *
+ *   ESPressio_SocketClockSynchronization.hpp
+ *
+ * This keeps ESPressio Event/Serializable and ESPressio Timing dependencies
+ * opt-in at the consuming-code level.
  */
