@@ -33,8 +33,8 @@ public:
     }
 };
 
-static Security::TransportSecurity Make(Security::AeadCipherRegistry& registry, Security::StaticKeyProvider& keys, Random& random, uint64_t sender) {
-    Security::TransportSecurityConfig cfg; cfg.Policy=Security::TransportSecurityPolicy::Required; cfg.OutboundAlgorithm=Security::AeadAlgorithm::TestOnly; cfg.OutboundKeyID=1; cfg.SenderID=sender; cfg.MaximumPlaintextBytes=4096;
+static Security::TransportSecurity Make(Security::AeadCipherRegistry& registry, Security::StaticKeyProvider& keys, Random& random, uint64_t sender, Security::TransportSecurityPolicy policy = Security::TransportSecurityPolicy::Required) {
+    Security::TransportSecurityConfig cfg; cfg.Policy=policy; cfg.OutboundAlgorithm=Security::AeadAlgorithm::TestOnly; cfg.OutboundKeyID=1; cfg.SenderID=sender; cfg.MaximumPlaintextBytes=4096;
     return Security::TransportSecurity(registry,keys,random,cfg);
 }
 
@@ -48,6 +48,7 @@ int main() {
     Sockets::SocketSecuritySession rx(receiver,[](const uint8_t*,std::size_t){return true;});
     bool received=false; rx.SetReceiveCallback([&](const Security::UnprotectedPayload& opened){received=true;assert(opened.Protocol==9);assert(std::string(opened.Data.begin(),opened.Data.end())=="hello stream");});
     assert(tx.Send(9,"hello stream",12)); assert(!wire.empty());
+    assert(wire[4] == 9); // outer route field
     // Arbitrary TCP-style chunking.
     assert(rx.Feed(wire.data(),2)); assert(!received); assert(rx.Feed(wire.data()+2,5)); assert(!received); assert(rx.Feed(wire.data()+7,wire.size()-7)); assert(received);
 
@@ -56,15 +57,30 @@ int main() {
     auto receiver2=Make(registry,keys,randomB,33); Sockets::SocketSecuritySession rx2(receiver2,[](const uint8_t*,std::size_t){return true;}); rx2.SetReceiveCallback([&](const Security::UnprotectedPayload&){++count;}); assert(rx2.Feed(first.data(),first.size())); assert(count==2);
 
     // Oversized declared stream frame is rejected and session can be Reset.
-    auto receiver3=Make(registry,keys,randomB,44); Sockets::SocketSecuritySessionConfig tiny; tiny.MaximumProtectedFrameBytes=64; Sockets::SocketSecuritySession limited(receiver3,[](const uint8_t*,std::size_t){return true;},tiny); uint8_t bad[4]={0xFF,0x00,0x00,0x00}; assert(!limited.Feed(bad,4)); limited.Reset(); assert(limited.BufferedBytes()==0);
+    auto receiver3=Make(registry,keys,randomB,44); Sockets::SocketSecuritySessionConfig tiny; tiny.MaximumProtectedFrameBytes=64; Sockets::SocketSecuritySession limited(receiver3,[](const uint8_t*,std::size_t){return true;},tiny); uint8_t bad[5]={0xFF,0x00,0x00,0x00,0x09}; assert(!limited.Feed(bad,5)); limited.Reset(); assert(limited.BufferedBytes()==0);
 
-    // Datagram path preserves one complete Security envelope.
+    // Datagram path preserves one complete Security envelope plus outer protocol field.
     std::vector<uint8_t> packet; auto ds=Make(registry,keys,randomA,55); auto dr=Make(registry,keys,randomB,66);
     Sockets::SocketSecurityDatagram dtx(ds,[&](const uint8_t* d,std::size_t s){packet.assign(d,d+s);return true;});
     Sockets::SocketSecurityDatagram drx(dr,[](const uint8_t*,std::size_t){return true;}); bool dgot=false; drx.SetReceiveCallback([&](const Security::UnprotectedPayload& p){dgot=true;assert(p.Protocol==7);assert(p.Protected);});
-    assert(dtx.Send(7,"udp",3)); assert(drx.Receive(packet.data(),packet.size())); assert(dgot);
+    assert(dtx.Send(7,"udp",3)); assert(packet.front()==7); assert(drx.Receive(packet.data(),packet.size())); assert(dgot);
     // Replay of same datagram is rejected by Security.
     assert(!drx.Receive(packet.data(),packet.size()));
+
+    // Disabled policy still preserves routing because protocol lives outside the optional envelope.
+    auto plainSender=Make(registry,keys,randomA,77,Security::TransportSecurityPolicy::Disabled);
+    auto plainReceiver=Make(registry,keys,randomB,88,Security::TransportSecurityPolicy::Disabled);
+    std::vector<uint8_t> plainWire;
+    Sockets::SocketSecuritySession ptx(plainSender,[&](const uint8_t* d,std::size_t s){plainWire.assign(d,d+s);return true;});
+    Sockets::SocketSecuritySession prx(plainReceiver,[](const uint8_t*,std::size_t){return true;});
+    bool pgot=false; prx.SetReceiveCallback([&](const Security::UnprotectedPayload& p){pgot=true;assert(p.Protocol==12);assert(!p.Protected);assert(std::string(p.Data.begin(),p.Data.end())=="plain");});
+    assert(ptx.Send(12,"plain",5)); assert(plainWire[4]==12); assert(prx.Feed(plainWire.data(),plainWire.size())); assert(pgot);
+
+    // Tampering only the outer route field of a protected frame causes authenticated protocol mismatch.
+    auto tampered=wire; tampered[4]=10;
+    auto receiver4=Make(registry,keys,randomB,99); Sockets::SocketSecuritySession rx4(receiver4,[](const uint8_t*,std::size_t){return true;});
+    bool failed=false; rx4.SetFailureCallback([&](const Security::SecurityResult& r){failed=true;assert(r.Error==Security::SecurityError::ProtocolMismatch);});
+    assert(rx4.Feed(tampered.data(),tampered.size())); assert(failed);
 
     std::cout << "Socket Security tests passed\n";
 }
