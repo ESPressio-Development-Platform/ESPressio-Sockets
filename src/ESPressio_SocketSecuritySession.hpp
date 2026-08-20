@@ -33,8 +33,9 @@ public:
         if (resultOut) *resultOut = result;
         if (!result.Success || protectedBytes.empty() || protectedBytes.size() > _config.MaximumProtectedFrameBytes || protectedBytes.size() > 0xFFFFFFFFu) return false;
         std::vector<uint8_t> frame;
-        frame.reserve(4 + protectedBytes.size());
+        frame.reserve(5 + protectedBytes.size());
         Append32(frame, static_cast<uint32_t>(protectedBytes.size()));
+        frame.push_back(protocol);
         frame.insert(frame.end(), protectedBytes.begin(), protectedBytes.end());
         return _writer(frame.data(), frame.size());
     }
@@ -43,7 +44,7 @@ public:
         if ((data == nullptr && size != 0) || _discarding) return false;
         if (size) _buffer.insert(_buffer.end(), data, data + size);
         while (true) {
-            if (_buffer.size() < 4) return true;
+            if (_buffer.size() < 5) return true;
             const uint32_t length = Read32(_buffer.data());
             if (length == 0 || length > _config.MaximumProtectedFrameBytes) {
                 _buffer.clear(); _discarding = true;
@@ -51,9 +52,10 @@ public:
                 if (_failure) _failure(failure);
                 return false;
             }
-            if (_buffer.size() < 4 + static_cast<std::size_t>(length)) return true;
-            ProcessEnvelope(_buffer.data() + 4, length);
-            _buffer.erase(_buffer.begin(), _buffer.begin() + 4 + length);
+            if (_buffer.size() < 5 + static_cast<std::size_t>(length)) return true;
+            const uint8_t protocol = _buffer[4];
+            ProcessEnvelope(protocol, _buffer.data() + 5, length);
+            _buffer.erase(_buffer.begin(), _buffer.begin() + 5 + length);
         }
     }
 
@@ -69,11 +71,8 @@ private:
     std::vector<uint8_t> _buffer;
     bool _discarding = false;
 
-    static uint8_t CandidateProtocol(const uint8_t* envelope, std::size_t size) { return size > 7 ? envelope[7] : 0; }
-
-    void ProcessEnvelope(const uint8_t* envelope, std::size_t size) {
+    void ProcessEnvelope(uint8_t protocol, const uint8_t* envelope, std::size_t size) {
         Security::UnprotectedPayload opened;
-        const uint8_t protocol = CandidateProtocol(envelope, size);
         auto result = _security.Unprotect(protocol, envelope, size, opened);
         if (!result.Success) { if (_failure) _failure(result); return; }
         if (_receive) _receive(opened);
