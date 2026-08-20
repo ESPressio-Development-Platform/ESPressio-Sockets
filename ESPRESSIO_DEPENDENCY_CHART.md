@@ -361,3 +361,8 @@ Units + Serializable
 ```
 
 This keeps the individual libraries independently useful while allowing progressively richer ESPressio compositions without imposing unnecessary dependencies on applications that do not use those integrations.
+
+
+## ESPressio Sockets → ESPressio Command — opt-in
+
+Sockets 0.3.0 optionally consumes **ESPressio Command >= 0.2.0 < 1.0.0** when `SocketCommandSession` or `TCPCommandServer` is selected. Core Sockets remains independent of Command. The integration owns socket framing, bounded per-client state, connection/request metadata and result transport; ESPressio Command continues to own Command definition, typed parsing/validation, routing and callback execution. The structured socket protocol does not require ESPressio Serializable.
