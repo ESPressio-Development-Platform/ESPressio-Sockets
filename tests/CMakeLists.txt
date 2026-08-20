@@ -18,6 +18,7 @@ if(ESPRESSIO_TIMING_INCLUDE_DIR AND ESPRESSIO_UNITS_INCLUDE_DIR AND ESPRESSIO_OB
     target_compile_features(test_clock_sync_protocol PRIVATE cxx_std_17)
     target_compile_options(test_clock_sync_protocol PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_include_directories(test_clock_sync_protocol PRIVATE
+        stubs
         ../src
         ../src/timing
         ${ESPRESSIO_TIMING_INCLUDE_DIR}
