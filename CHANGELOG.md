@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.4.0 — 2026-08-20
+
+### Added
+- Added opt-in ESPressio Security integration targeting Security >= 0.1.0 < 1.0.0.
+- Added `SocketSecuritySession` for TCP/TLS/WebSocket-style byte streams with explicit protected-frame length framing and arbitrary receive chunking.
+- Added `SocketSecurityDatagram` for UDP/message-oriented carriers with one ESPressio Security envelope per datagram.
+- Added authenticated receive callbacks and security-failure observation without exposing key material.
+- Added support for Security sender IDs, authenticated session epochs, key IDs, AEAD algorithm abstraction and replay protection.
+- Added secure TCP client example and host tests for fragmented/coalesced stream frames, frame limits, datagram protection, and replay rejection.
+
+### Changed
+- Bumped package/component/public version metadata to 0.4.0.
+- Kept Security optional; the normal `ESPressio_Sockets.hpp` umbrella does not include Security-dependent headers.
+- Existing Event, Command, Timing, TCP/UDP/TLS/WebSocket/MQTT functionality remains source-compatible.
+- Documented ESPressio Security as independent from TLS and usable either alone or as defense-in-depth.
+
+### Compatibility
+- Existing 0.3.x applications continue to operate unchanged when Security integration is not selected.
+- Security does not become a mandatory dependency of core Sockets.
+
 ## 0.3.0 — 2026-08-20
 
 ### Added
