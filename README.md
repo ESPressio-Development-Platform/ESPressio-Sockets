@@ -6,11 +6,11 @@ ESPressio Sockets provides IP/socket-oriented communication adapters separately 
 
 ## Latest Stable Version
 
-The current repository version is **0.2.3**.
+The current repository version is **0.3.0**.
 
 ## Compatibility
 
-ESPressio Sockets `0.2.3` targets the **ESP32 family under Arduino-ESP32** and uses C++17.
+ESPressio Sockets `0.3.0` targets the **ESP32 family under Arduino-ESP32** and uses C++17.
 
 The library uses Arduino-ESP32 native networking classes for UDP, TCP and TLS. WebSocket support is provided through the mature Links2004 `arduinoWebSockets` library.
 
@@ -60,6 +60,8 @@ ESPressio Event >= 5.7.1 < 6.0.0
 ```
 
 and therefore the Serializable support used by ESPressio Event Transport.
+
+Command invocation is also opt-in and targets **ESPressio Command >= 0.2.0 < 1.0.0**. See [Command Integration](COMMAND_INTEGRATION.md) for the TCP server, line/structured protocols, session metadata, policy hooks, limits, and examples.
 
 WebSocket adapters additionally use:
 
@@ -570,7 +572,7 @@ build_flags =
     -std=gnu++17
 
 lib_deps =
-    flowduino/ESPressio-Sockets@^0.2.3
+    flowduino/ESPressio-Sockets@^0.3.0
     flowduino/ESPressio-Event@^5.7.1
     links2004/WebSockets@^2.3.6
     knolleary/PubSubClient@^2.8

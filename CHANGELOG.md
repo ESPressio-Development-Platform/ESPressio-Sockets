@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.0 — 2026-08-20
+
+### Added
+- Added opt-in ESPressio Command 0.2.x integration for remote Command invocation over sockets.
+- Added host-testable `SocketCommandSession` with line-oriented and structured-binary request modes.
+- Added `TCPCommandServer` with isolated per-client Command sessions.
+- Added request/connection metadata, policy hooks, result observers, correlation IDs, bounded request handling, and structured request/response framing.
+- Added a TCP Command server example and comprehensive host tests for Command framing, dispatch, validation, session isolation, policy and error paths.
+- Added a permanent GitHub Actions host-test workflow pinned to released ESPressio dependencies.
+
+### Changed
+- Updated package/component version metadata to 0.3.0.
+- Updated README and ESPressio dependency documentation for optional Command integration.
+- Expanded host regression testing to retain coverage of the existing socket clock-synchronization protocol.
+
+### Compatibility
+- Core ESPressio Sockets remains independent of ESPressio Command.
+- Existing Event Transport and Timing synchronization APIs remain source-compatible.
+- ESPressio Command is required only when Command integration headers are selected.
+
 ## 0.2.3 — 2026-08-20
 
 ### Changed
