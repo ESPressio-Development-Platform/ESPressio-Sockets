@@ -1,0 +1,31 @@
+=== CONFIGURE ===
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (4.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/build
+configure_exit=0
+[ 25%] Building CXX object CMakeFiles/test_socket_command.dir/test_socket_command.cpp.o
+[ 50%] Building CXX object CMakeFiles/test_clock_sync_protocol.dir/test_clock_sync_protocol.cpp.o
+In file included from /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/deps/ESPressio-Units/src/ESPressio_Time.hpp:3,
+                 from /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/deps/ESPressio-Timing/src/ESPressio_ClockTypes.hpp:4,
+                 from /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/deps/ESPressio-Timing/src/ESPressio_ClockSynchronization.hpp:5,
+                 from /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/deps/ESPressio-Timing/src/ESPressio_IClockSynchronizationTarget.hpp:3,
+                 from /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/tests/../src/timing/ESPressio_SocketClockSynchronizationProtocol.hpp:9,
+                 from /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/tests/test_clock_sync_protocol.cpp:4:
+/home/runner/work/ESPressio-Sockets/ESPressio-Sockets/deps/ESPressio-Units/src/ESPressio_Unit.hpp:3:10: fatal error: Arduino.h: No such file or directory
+    3 | #include <Arduino.h>
+      |          ^~~~~~~~~~~
+compilation terminated.
+gmake[2]: *** [CMakeFiles/test_clock_sync_protocol.dir/build.make:79: CMakeFiles/test_clock_sync_protocol.dir/test_clock_sync_protocol.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:122: CMakeFiles/test_clock_sync_protocol.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+[ 75%] Linking CXX executable test_socket_command
+[ 75%] Built target test_socket_command
+gmake: *** [Makefile:101: all] Error 2
+build_exit=2
+test_exit=99
