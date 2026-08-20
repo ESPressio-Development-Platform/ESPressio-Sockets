@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/command-socket-integration
+      - feature/observable-callback-coverage
   pull_request:
 
 jobs:
@@ -14,12 +14,19 @@ jobs:
       - name: Checkout Sockets
         uses: actions/checkout@v4
 
-      - name: Checkout ESPressio Command 0.2.0
+      - name: Checkout ESPressio Command 0.3.0 feature source
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Command
-          ref: 0.2.0
+          ref: 74ea89f9c8895cfaa272bae44d0eba5711a3dbc1
           path: deps/ESPressio-Command
+
+      - name: Checkout ESPressio Security 0.2.0 feature source
+        uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Security
+          ref: cb5224b3f98174f8b521ff87d92a373d2e97dcf7
+          path: deps/ESPressio-Security
 
       - name: Checkout ESPressio Timing 2.2.2
         uses: actions/checkout@v4
@@ -46,6 +53,7 @@ jobs:
         run: >-
           cmake -S tests -B build
           -DESPRESSIO_COMMAND_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Command/src"
+          -DESPRESSIO_SECURITY_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Security/src"
           -DESPRESSIO_TIMING_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Timing/src"
           -DESPRESSIO_UNITS_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Units/src"
           -DESPRESSIO_OBSERVABLE_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Observable/src"
