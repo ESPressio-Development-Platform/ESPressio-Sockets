@@ -6,11 +6,11 @@ ESPressio Sockets provides IP/socket-oriented communication adapters separately 
 
 ## Latest Stable Version
 
-The current repository version is **0.2.2**.
+The current repository version is **0.2.3**.
 
 ## Compatibility
 
-ESPressio Sockets `0.2.2` targets the **ESP32 family under Arduino-ESP32** and uses C++17.
+ESPressio Sockets `0.2.3` targets the **ESP32 family under Arduino-ESP32** and uses C++17.
 
 The library uses Arduino-ESP32 native networking classes for UDP, TCP and TLS. WebSocket support is provided through the mature Links2004 `arduinoWebSockets` library.
 
@@ -56,7 +56,7 @@ The core `ESPressio_Sockets.hpp` header contains only the common socket types an
 Event Transport adapters require:
 
 ```text
-ESPressio Event >= 5.6.2 < 6.0.0
+ESPressio Event >= 5.7.1 < 6.0.0
 ```
 
 and therefore the Serializable support used by ESPressio Event Transport.
@@ -570,8 +570,8 @@ build_flags =
     -std=gnu++17
 
 lib_deps =
-    flowduino/ESPressio-Sockets@^0.2.2
-    flowduino/ESPressio-Event@^5.6.2
+    flowduino/ESPressio-Sockets@^0.2.3
+    flowduino/ESPressio-Event@^5.7.1
     links2004/WebSockets@^2.3.6
     knolleary/PubSubClient@^2.8
 ```
@@ -655,7 +655,7 @@ Applications that need socket-based System Clock synchronization include:
 and provide:
 
 ```text
-ESPressio Timing >= 2.2.1 < 3.0.0
+ESPressio Timing >= 2.2.2 < 3.0.0
 ```
 
 The ownership boundary remains:
@@ -859,7 +859,7 @@ Conversely, a project using:
 #include <ESPressio_SocketClockSynchronization.hpp>
 ```
 
-must supply ESPressio Timing `>=2.2.1 <3.0.0`.
+must supply ESPressio Timing `>=2.2.2 <3.0.0`.
 
 ## Synchronization examples
 
