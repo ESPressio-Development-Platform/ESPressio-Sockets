@@ -1,13 +1,26 @@
 #pragma once
 
+#ifndef ESPRESSIO_SOCKETS_VERSION_MAJOR
+#define ESPRESSIO_SOCKETS_VERSION_MAJOR 0
+#endif
+#ifndef ESPRESSIO_SOCKETS_VERSION_MINOR
+#define ESPRESSIO_SOCKETS_VERSION_MINOR 4
+#endif
+#ifndef ESPRESSIO_SOCKETS_VERSION_PATCH
+#define ESPRESSIO_SOCKETS_VERSION_PATCH 0
+#endif
+#ifndef ESPRESSIO_SOCKETS_VERSION_STRING
+#define ESPRESSIO_SOCKETS_VERSION_STRING "0.4.0"
+#endif
+
 #include "ESPressio_SocketTypes.hpp"
 #include "ESPressio_SocketEventFrame.hpp"
 
 /*
- * Event transport adapters are deliberately NOT batch-included here.
+ * Dependency-bearing integrations are deliberately NOT batch-included here.
+ * Include only the facilities required by the project.
  *
- * Include only the protocol adapter(s) required by the project:
- *
+ * Event transports:
  *   ESPressio_UDPEventTransport.hpp
  *   ESPressio_TCPClientEventTransport.hpp
  *   ESPressio_TCPServerEventTransport.hpp
@@ -16,17 +29,19 @@
  *   ESPressio_WebSocketServerEventTransport.hpp
  *   ESPressio_MQTTEventTransport.hpp
  *
- * Timing synchronization is likewise opt-in through:
- *
+ * Timing:
  *   ESPressio_SocketClockSynchronization.hpp
  *
- * Command invocation is opt-in through:
- *
+ * Command:
  *   ESPressio_SocketCommandTypes.hpp
  *   ESPressio_SocketCommandProtocol.hpp
  *   ESPressio_SocketCommandSession.hpp
  *   ESPressio_TCPCommandServer.hpp
  *
- * This keeps ESPressio Event/Serializable, ESPressio Timing, and ESPressio
- * Command dependencies opt-in at the consuming-code level.
+ * Security:
+ *   ESPressio_SocketSecuritySession.hpp
+ *   ESPressio_SocketSecurityDatagram.hpp
+ *
+ * This keeps Event/Serializable, Timing, Command, and Security dependencies
+ * opt-in at the consuming-code level.
  */
