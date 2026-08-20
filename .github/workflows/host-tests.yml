@@ -14,18 +14,18 @@ jobs:
       - name: Checkout Sockets
         uses: actions/checkout@v4
 
-      - name: Checkout ESPressio Command 0.3.0 feature source
+      - name: Checkout ESPressio Command 0.3.0
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Command
-          ref: 74ea89f9c8895cfaa272bae44d0eba5711a3dbc1
+          ref: 0.3.0
           path: deps/ESPressio-Command
 
-      - name: Checkout ESPressio Security 0.2.0 feature source
+      - name: Checkout ESPressio Security 0.2.0
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Security
-          ref: cb5224b3f98174f8b521ff87d92a373d2e97dcf7
+          ref: 0.2.0
           path: deps/ESPressio-Security
 
       - name: Checkout ESPressio Timing 2.2.2
