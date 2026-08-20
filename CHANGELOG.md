@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.3 — 2026-08-20
+
+### Changed
+- Updated the validated optional ESPressio Event Transport baseline from Event 5.6.2 to Event 5.7.1 within the 5.x line.
+- Updated the validated optional ESPressio Timing synchronization baseline from Timing 2.2.1 to Timing 2.2.2 within the 2.x line.
+- Updated package metadata for Sockets 0.2.3.
+- Core Sockets remains independent of mandatory ESPressio dependencies; Event and Timing integrations remain opt-in.
+- No UDP, TCP, TLS, WebSocket, MQTT, framing, or synchronization runtime semantics changed.
+
 ## 0.2.2 — 2026-08-19
 
 ### Changed
