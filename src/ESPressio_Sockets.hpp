@@ -20,6 +20,13 @@
  *
  *   ESPressio_SocketClockSynchronization.hpp
  *
- * This keeps ESPressio Event/Serializable and ESPressio Timing dependencies
- * opt-in at the consuming-code level.
+ * Command invocation is opt-in through:
+ *
+ *   ESPressio_SocketCommandTypes.hpp
+ *   ESPressio_SocketCommandProtocol.hpp
+ *   ESPressio_SocketCommandSession.hpp
+ *   ESPressio_TCPCommandServer.hpp
+ *
+ * This keeps ESPressio Event/Serializable, ESPressio Timing, and ESPressio
+ * Command dependencies opt-in at the consuming-code level.
  */
