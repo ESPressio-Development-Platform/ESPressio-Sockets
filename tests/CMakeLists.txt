@@ -3,8 +3,14 @@ project(ESPressioSocketsTests LANGUAGES CXX)
 
 enable_testing()
 
+add_executable(test_core_include test_core_include.cpp)
+target_compile_features(test_core_include PRIVATE cxx_std_17)
+target_compile_options(test_core_include PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_include_directories(test_core_include PRIVATE stubs ../src)
+add_test(NAME CoreWithoutCommand COMMAND test_core_include)
+
 if(NOT ESPRESSIO_COMMAND_INCLUDE_DIR)
-    message(FATAL_ERROR "ESPRESSIO_COMMAND_INCLUDE_DIR is required")
+    message(FATAL_ERROR "ESPRESSIO_COMMAND_INCLUDE_DIR is required for SocketCommand tests")
 endif()
 
 add_executable(test_socket_command test_socket_command.cpp)
