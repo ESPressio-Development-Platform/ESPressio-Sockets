@@ -27,14 +27,19 @@ public:
         std::vector<uint8_t> protectedBytes;
         auto result = _security.Protect(protocol, static_cast<const uint8_t*>(payload), payloadLength, protectedBytes);
         if (resultOut) *resultOut = result;
-        return result.Success && _sender(protectedBytes.data(), protectedBytes.size());
+        if (!result.Success || protectedBytes.empty()) return false;
+        std::vector<uint8_t> datagram;
+        datagram.reserve(1 + protectedBytes.size());
+        datagram.push_back(protocol);
+        datagram.insert(datagram.end(), protectedBytes.begin(), protectedBytes.end());
+        return _sender(datagram.data(), datagram.size());
     }
 
     bool Receive(const uint8_t* datagram, std::size_t size) {
-        if (datagram == nullptr || size == 0) return false;
+        if (datagram == nullptr || size < 2) return false;
+        const uint8_t protocol = datagram[0];
         Security::UnprotectedPayload opened;
-        const uint8_t protocol = size > 7 ? datagram[7] : 0;
-        auto result = _security.Unprotect(protocol, datagram, size, opened);
+        auto result = _security.Unprotect(protocol, datagram + 1, size - 1, opened);
         if (!result.Success) {
             if (_failure) _failure(result);
             return false;
