@@ -150,7 +150,9 @@ private:
                 if (_discardUntilNewline) {
                     _discardUntilNewline = false;
                     _line.clear();
-                    success = WriteLineResult(Command::CommandResult::Error("Command exceeds maximum request length")) && success;
+                    const bool wrote = WriteLineResult(Command::CommandResult::Error("Command exceeds maximum request length"));
+                    if (_config.DisconnectOnProtocolError) return false;
+                    success = wrote && success;
                     continue;
                 }
                 std::string line = std::move(_line);
@@ -216,7 +218,8 @@ private:
                 if (_expectedStructuredBytes == 0 || _expectedStructuredBytes > _config.MaximumRequestBytes) {
                     _structured.clear();
                     _expectedStructuredBytes = 0;
-                    return EmitStructuredError(0, "Structured Command frame exceeds configured limit");
+                    const bool wrote = EmitStructuredError(0, "Structured Command frame exceeds configured limit");
+                    return _config.DisconnectOnProtocolError ? false : wrote;
                 }
             }
             if (_structured.size() < _expectedStructuredBytes) break;

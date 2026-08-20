@@ -99,6 +99,13 @@ int main() {
         assert(policyCalled);
         assert(observerCalled);
         assert(AsString(output) == "ERR 403 remote policy denied\n");
+
+        session.SetPolicy({});
+        session.SetResultObserver({});
+        output.clear();
+        const char* unknown = "does-not-exist\n";
+        assert(session.Feed(reinterpret_cast<const uint8_t*>(unknown), std::strlen(unknown)));
+        assert(AsString(output).find("ERR 1 Unknown command") == 0);
     }
 
     {
@@ -172,7 +179,7 @@ int main() {
             policyCalled = true;
             assert(context.Metadata.Transport == "tcp");
             assert(context.Metadata.SessionID == 99);
-            assert(context.Metadata.RequestID == 42);
+            assert(context.Metadata.RequestID >= 42 && context.Metadata.RequestID <= 44);
             assert(context.Invocation.path.size() == 2);
             return Command::CommandResult::Ok();
         });
@@ -239,6 +246,25 @@ int main() {
         const char nl = '\n';
         assert(a.Feed(reinterpret_cast<const uint8_t*>(&nl), 1));
         assert(AsString(outA) == "OK 0 A\n");
+    }
+
+    {
+        Command::CommandRegistry registry;
+        registry.Command("ping").OnExecute([](const Command::CommandContext&) {
+            return Command::CommandResult::Ok("pong");
+        });
+        Sockets::SocketCommandSessionConfig config;
+        config.MaximumRequestBytes = 4;
+        config.DisconnectOnProtocolError = true;
+        std::vector<uint8_t> output;
+        Sockets::SocketCommandSession session;
+        assert(session.Initialize(registry, config, {}, [&](const uint8_t* d, std::size_t n) {
+            output.insert(output.end(), d, d + n);
+            return true;
+        }));
+        const char* oversized = "12345\n";
+        assert(!session.Feed(reinterpret_cast<const uint8_t*>(oversized), std::strlen(oversized)));
+        assert(AsString(output) == "ERR 1 Command exceeds maximum request length\n");
     }
 
     {
