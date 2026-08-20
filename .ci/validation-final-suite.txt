@@ -1,0 +1,33 @@
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/build
+configure_exit=0
+[ 33%] Building CXX object CMakeFiles/test_socket_command.dir/test_socket_command.cpp.o
+[ 33%] Building CXX object CMakeFiles/test_core_include.dir/test_core_include.cpp.o
+[ 50%] Building CXX object CMakeFiles/test_clock_sync_protocol.dir/test_clock_sync_protocol.cpp.o
+[ 66%] Linking CXX executable test_core_include
+[ 66%] Built target test_core_include
+[ 83%] Linking CXX executable test_clock_sync_protocol
+[ 83%] Built target test_clock_sync_protocol
+[100%] Linking CXX executable test_socket_command
+[100%] Built target test_socket_command
+build_exit=0
+Internal ctest changing into directory: /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/build
+Test project /home/runner/work/ESPressio-Sockets/ESPressio-Sockets/build
+    Start 1: CoreWithoutCommand
+1/3 Test #1: CoreWithoutCommand ...............   Passed    0.00 sec
+    Start 2: SocketCommand
+2/3 Test #2: SocketCommand ....................   Passed    0.00 sec
+    Start 3: ClockSynchronizationProtocol
+3/3 Test #3: ClockSynchronizationProtocol .....   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   0.01 sec
+test_exit=0
