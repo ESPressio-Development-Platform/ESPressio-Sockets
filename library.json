@@ -1,7 +1,7 @@
 {
     "name": "ESPressio-Sockets",
-    "description": "Socket-based ESPressio transports and Timing synchronization providers for ESP32, including UDP, TCP, TLS, WebSocket and MQTT Event Transport adapters.",
-    "keywords": "esp32,sockets,udp,tcp,tls,websocket,mqtt,event,transport,network,timing,clock,synchronization,sntp,espressio",
+    "description": "Socket-based ESPressio transports, Command invocation adapters, and Timing synchronization providers for ESP32.",
+    "keywords": "esp32,sockets,udp,tcp,tls,websocket,mqtt,event,command,cli,transport,network,timing,clock,synchronization,sntp,espressio",
     "authors": {
         "name": "Flowduino",
         "maintainer": true,
@@ -16,7 +16,7 @@
         "type": "git",
         "url": "https://github.com/Flowduino/ESPressio-Sockets.git"
     },
-    "version": "0.2.3",
+    "version": "0.3.0",
     "license": "Apache-2.0",
     "frameworks": "arduino",
     "platforms": "espressif32",
