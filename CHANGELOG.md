@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0 — 2026-08-20
+
+### Added
+- Added `ISocketWorkerObserver` and observable socket-worker lifecycle notifications for start, start failure, and stop transitions.
+- Added `ISocketSecuritySessionObserver` and observable secure-session fault/reset notifications.
+- Added ESPressio Observable >= 3.0.1 < 4.0.0 as the common lifecycle-observer dependency.
+- Added optional ESPressio Event bridge support through ESPressio Event 5.8.0.
+
+### Changed
+- Updated the validated optional ESPressio Security baseline to Security >= 0.2.0 < 1.0.0.
+- Security session send/unprotect/frame-limit failures now publish lifecycle observations while preserving existing result and callback behavior.
+- Bumped package/component/public version metadata to 0.5.0.
+- Event, Timing, Command and Security integrations remain opt-in.
+
 ## 0.4.0 — 2026-08-20
 
 ### Added
