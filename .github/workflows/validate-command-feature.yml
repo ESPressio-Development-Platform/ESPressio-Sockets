@@ -1,0 +1,63 @@
+name: Validate Command Feature
+
+on:
+  push:
+    branches: [feature/command-socket-integration]
+    paths: ['.github/workflows/validate-command-feature.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/command-socket-integration
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Command
+          ref: 0.2.0
+          path: deps/ESPressio-Command
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Timing
+          ref: 2.2.2
+          path: deps/ESPressio-Timing
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Units
+          ref: 0.2.1
+          path: deps/ESPressio-Units
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Observable
+          ref: 3.0.1
+          path: deps/ESPressio-Observable
+      - name: Validate and report
+        shell: bash
+        run: |
+          set +e
+          {
+            echo '=== CONFIGURE ==='
+            cmake -S tests -B build \
+              -DESPRESSIO_COMMAND_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Command/src" \
+              -DESPRESSIO_TIMING_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Timing/src" \
+              -DESPRESSIO_UNITS_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Units/src" \
+              -DESPRESSIO_OBSERVABLE_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Observable/src"
+            c1=$?
+            echo "configure_exit=$c1"
+            if [ $c1 -eq 0 ]; then cmake --build build --parallel; c2=$?; else c2=99; fi
+            echo "build_exit=$c2"
+            if [ $c1 -eq 0 ] && [ $c2 -eq 0 ]; then ctest --test-dir build --output-on-failure; c3=$?; else c3=99; fi
+            echo "test_exit=$c3"
+          } > validation.txt 2>&1
+          cat validation.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p .ci
+          mv validation.txt .ci/command-feature-validation.txt
+          git add -- .ci/command-feature-validation.txt
+          git commit -m "chore: record Command feature validation"
+          git push origin HEAD:feature/command-socket-integration
