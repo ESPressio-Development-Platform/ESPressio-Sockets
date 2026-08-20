@@ -126,7 +126,16 @@ private:
         if (!parseError.empty()) return WriteLineResult(Command::CommandResult::Error(parseError));
         if (tokens.empty()) return WriteLineResult(Command::CommandResult::Error("No command supplied"));
 
-        // Preserve the full text path/arguments behavior by letting Command parse the raw line.
+        // Text Commands are still parsed/executed by ESPressio Command, while
+        // Sockets exposes transport metadata to the network policy layer.
+        context.Invocation.path = {tokens.front()};
+        if (_policy) {
+            auto policyResult = _policy(context);
+            if (!policyResult.success) {
+                if (_observer) _observer(context, policyResult);
+                return WriteLineResult(policyResult);
+            }
+        }
         auto result = _registry->Invoke(line);
         if (_observer) _observer(context, result);
         return WriteLineResult(result);
