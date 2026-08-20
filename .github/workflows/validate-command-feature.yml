@@ -15,6 +15,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: feature/command-socket-integration
+
+      - name: Apply policy-path correction
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/ESPressio_SocketCommandSession.hpp')
+          s = p.read_text()
+          old = '''        // Preserve the full text path/arguments behavior by letting Command parse the raw line.\n        auto result = _registry->Invoke(line);\n        if (_observer) _observer(context, result);\n        return WriteLineResult(result);'''
+          new = '''        // Text Commands are still parsed/executed by ESPressio Command, while\n        // Sockets exposes transport metadata to the network policy layer.\n        context.Invocation.path = {tokens.front()};\n        if (_policy) {\n            auto policyResult = _policy(context);\n            if (!policyResult.success) {\n                if (_observer) _observer(context, policyResult);\n                return WriteLineResult(policyResult);\n            }\n        }\n        auto result = _registry->Invoke(line);\n        if (_observer) _observer(context, result);\n        return WriteLineResult(result);'''
+          if old not in s:
+              raise SystemExit('policy patch target not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- src/ESPressio_SocketCommandSession.hpp
+          git commit -m "fix: apply socket policy to line Commands" || true
+          git push origin HEAD:feature/command-socket-integration
+
       - uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Command
@@ -35,6 +54,7 @@ jobs:
           repository: Flowduino/ESPressio-Observable
           ref: 3.0.1
           path: deps/ESPressio-Observable
+
       - name: Validate and report
         shell: bash
         run: |
@@ -54,10 +74,8 @@ jobs:
             echo "test_exit=$c3"
           } > validation.txt 2>&1
           cat validation.txt
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           mkdir -p .ci
           mv validation.txt .ci/command-feature-validation.txt
           git add -- .ci/command-feature-validation.txt
-          git commit -m "chore: record Command feature validation"
+          git commit -m "chore: record Command feature validation" || true
           git push origin HEAD:feature/command-socket-integration
