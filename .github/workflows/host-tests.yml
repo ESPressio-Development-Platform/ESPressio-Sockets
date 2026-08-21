@@ -16,17 +16,17 @@ jobs:
             echo 'Core Sockets umbrella must not acquire optional integration headers.'
             exit 1
           fi
-      - name: Checkout ESPressio Command 0.4.0 candidate
+      - name: Checkout ESPressio Command 0.4.0
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Command
-          ref: feature/3-own-event-bridge
+          ref: 0.4.0
           path: deps/ESPressio-Command
-      - name: Checkout ESPressio Security 0.3.0 candidate
+      - name: Checkout ESPressio Security 0.3.0
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Security
-          ref: feature/5-own-event-bridge
+          ref: 0.3.0
           path: deps/ESPressio-Security
       - name: Checkout ESPressio Timing 2.2.4
         uses: actions/checkout@v4
@@ -88,12 +88,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Security
-          ref: feature/5-own-event-bridge
+          ref: 0.3.0
           path: project/dependencies/ESPressio-Security
       - uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Event
-          ref: reintegration/6.0.0-event-architecture
+          ref: 6.0.0
           path: project/dependencies/ESPressio-Event
       - uses: actions/setup-python@v5
         with:
