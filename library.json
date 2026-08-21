@@ -2,41 +2,16 @@
     "name": "ESPressio-Sockets",
     "description": "Socket-based ESPressio transports, Command invocation adapters, Security sessions, and Timing synchronization providers for ESP32.",
     "keywords": "esp32,sockets,udp,tcp,tls,websocket,mqtt,event,command,security,encryption,transport,network,timing,clock,synchronization,observable,espressio",
-    "authors": {
-        "name": "Flowduino",
-        "maintainer": true,
-        "url": "https://flowduino.com"
-    },
-    "build": {
-        "flags": [
-            "-DESPRESSIO_SOCKETS"
-        ]
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Flowduino/ESPressio-Sockets.git"
-    },
-    "version": "0.5.0",
+    "authors": {"name": "Flowduino", "maintainer": true, "url": "https://flowduino.com"},
+    "build": {"flags": ["-DESPRESSIO_SOCKETS"]},
+    "repository": {"type": "git", "url": "https://github.com/Flowduino/ESPressio-Sockets.git"},
+    "version": "0.6.0",
     "license": "Apache-2.0",
     "frameworks": "arduino",
     "platforms": "espressif32",
     "dependencies": [
-        {
-            "name": "Flowduino ESPressio-Observable",
-            "version": ">=3.0.1 <4.0.0",
-            "url": "https://github.com/Flowduino/ESPressio-Observable.git"
-        },
-        {
-            "owner": "links2004",
-            "name": "WebSockets",
-            "version": "^2.3.6",
-            "platforms": "espressif32"
-        },
-        {
-            "owner": "knolleary",
-            "name": "PubSubClient",
-            "version": "^2.8",
-            "platforms": "espressif32"
-        }
+        {"name": "Flowduino ESPressio-Observable", "version": ">=3.0.1 <4.0.0", "url": "https://github.com/Flowduino/ESPressio-Observable.git"},
+        {"owner": "links2004", "name": "WebSockets", "version": "^2.3.6", "platforms": "espressif32"},
+        {"owner": "knolleary", "name": "PubSubClient", "version": "^2.8", "platforms": "espressif32"}
     ]
 }
