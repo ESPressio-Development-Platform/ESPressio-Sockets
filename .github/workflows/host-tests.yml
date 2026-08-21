@@ -2,9 +2,6 @@ name: Host Tests
 
 on:
   push:
-    branches:
-      - main
-      - feature/observable-callback-coverage
   pull_request:
 
 jobs:
@@ -13,42 +10,42 @@ jobs:
     steps:
       - name: Checkout Sockets
         uses: actions/checkout@v4
-
-      - name: Checkout ESPressio Command 0.3.0
+      - name: Verify core Sockets remains integration-light
+        run: |
+          if grep -nE '#[[:space:]]*include[[:space:]]*[<\"]ESPressio_(Event|Command|Security|Timing|SocketWorkerEventBridge|SocketSecuritySessionEventBridge)' src/ESPressio_Sockets.hpp; then
+            echo 'Core Sockets umbrella must not acquire optional integration headers.'
+            exit 1
+          fi
+      - name: Checkout ESPressio Command 0.4.0 candidate
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Command
-          ref: 0.3.0
+          ref: feature/3-own-event-bridge
           path: deps/ESPressio-Command
-
-      - name: Checkout ESPressio Security 0.2.0
+      - name: Checkout ESPressio Security 0.3.0 candidate
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Security
-          ref: 0.2.0
+          ref: feature/5-own-event-bridge
           path: deps/ESPressio-Security
-
-      - name: Checkout ESPressio Timing 2.2.2
+      - name: Checkout ESPressio Timing 2.2.4
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Timing
-          ref: 2.2.2
+          ref: 2.2.4
           path: deps/ESPressio-Timing
-
-      - name: Checkout ESPressio Units 0.2.1
+      - name: Checkout ESPressio Units 0.2.3
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Units
-          ref: 0.2.1
+          ref: 0.2.3
           path: deps/ESPressio-Units
-
       - name: Checkout ESPressio Observable 3.0.1
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Observable
           ref: 3.0.1
           path: deps/ESPressio-Observable
-
       - name: Configure
         run: >-
           cmake -S tests -B build
@@ -57,9 +54,80 @@ jobs:
           -DESPRESSIO_TIMING_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Timing/src"
           -DESPRESSIO_UNITS_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Units/src"
           -DESPRESSIO_OBSERVABLE_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Observable/src"
-
       - name: Build
         run: cmake --build build --parallel
-
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+  esp32-event-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: project/ESPressio-Sockets
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Observable
+          ref: 3.0.1
+          path: project/dependencies/ESPressio-Observable
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Units
+          ref: 0.2.3
+          path: project/dependencies/ESPressio-Units
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Timing
+          ref: 2.2.4
+          path: project/dependencies/ESPressio-Timing
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Threads
+          ref: 3.1.4
+          path: project/dependencies/ESPressio-Threads
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Security
+          ref: feature/5-own-event-bridge
+          path: project/dependencies/ESPressio-Security
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Event
+          ref: reintegration/6.0.0-event-architecture
+          path: project/dependencies/ESPressio-Event
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install PlatformIO
+        run: pip install platformio
+      - name: Create Socket Event integration compile project
+        shell: bash
+        run: |
+          mkdir -p project/compile/src
+          cat > project/compile/platformio.ini <<'EOF'
+          [env:esp32]
+          platform = espressif32
+          board = esp32dev
+          framework = arduino
+          build_flags = -std=gnu++17 -frtti
+          build_unflags = -std=gnu++11 -fno-rtti
+          lib_ldf_mode = deep+
+          lib_deps =
+              ../dependencies/ESPressio-Observable
+              ../dependencies/ESPressio-Units
+              ../dependencies/ESPressio-Timing
+              ../dependencies/ESPressio-Threads
+              ../dependencies/ESPressio-Security
+              ../dependencies/ESPressio-Event
+              ../ESPressio-Sockets
+          EOF
+          cat > project/compile/src/main.cpp <<'EOF'
+          #include <Arduino.h>
+          #include <ESPressio_SocketEvents.hpp>
+          #include <ESPressio_SocketWorkerEventBridge.hpp>
+          #include <ESPressio_SocketSecuritySessionEventBridge.hpp>
+          void setup() {}
+          void loop() {}
+          EOF
+      - name: Compile Socket Event integration
+        run: pio run -d project/compile
