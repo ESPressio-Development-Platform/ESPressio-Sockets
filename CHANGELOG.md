@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.6.0 — 2026-08-21
+
+### Added
+- Moved Socket worker and Socket security-session Event types, `SocketWorkerEventBridge`, and `SocketSecuritySessionEventBridge` ownership into ESPressio Sockets.
+- Added Sockets-owned optional Event integration targeting ESPressio Event 6.0.0.
+
+### Changed
+- Preserved the existing Socket Event bridge/header names in their new owning package.
+- Updated validated optional integration generation to Command 0.4.0, Security 0.3.0, Event 6.0.0, Timing 2.2.4, Units 0.2.3, and Observable 3.0.1.
+- Core `ESPressio_Sockets.hpp` remains free of Event-, Command-, Security-, and Timing-specific integration headers.
+- Updated package/component metadata, README, CI, and both dependency-chart forms for Sockets 0.6.0.
+
+### Compatibility
+- Existing socket transport, Event Transport, Command, Security, and Timing runtime semantics are unchanged.
+- Applications using Socket lifecycle Event bridges must obtain them from ESPressio Sockets 0.6.0 rather than ESPressio Event 6.0.0.
+
+### Tracking
+- Implements #12.
+- Coordinated with Flowduino/ESPressio-Event#34.
+
 ## 0.5.0 — 2026-08-20
 
 ### Added
@@ -77,70 +97,3 @@ All notable changes to this project are documented in this file.
 The structure follows the principles of [Keep a
 Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic
 Versioning](https://semver.org/).
-
-> **Historical note:** This changelog was reconstructed retrospectively
-> from published GitHub Releases, tags, release notes, repository
-> history, and the documented public API. Where an historical release
-> had little or no release-note detail, the entry is intentionally terse
-> rather than inferring unsupported intent.
-
-## [0.2.1] - 2026-08-19
-
-### Changed
-
-- Updated all optional socket Event Transport adapters to require ESPressio Event 5.5.0 or newer.
-- Updated Event Transport documentation and PlatformIO dependency examples for ESPressio Event 5.5.0.
-- Bumped ESPressio Sockets package/version metadata to 0.2.1.
-
-### Compatibility
-
-- No UDP, TCP, TLS, WebSocket, MQTT, or System Clock synchronization interfaces are changed by this patch release.
-- Timing integration remains opt-in and unchanged.
-- Core Sockets usage remains independent of ESPressio Event.
-
-## \[0.2.0\] - 2026-08-19
-
-### Added
-
--   Added opt-in ESPressio Timing System Clock synchronization.
--   Added UDP four-timestamp request/response synchronization.
--   Added UDP authoritative broadcast and multicast synchronization.
--   Added TCP client/server clock synchronization.
--   Added WebSocket client/server clock synchronization.
--   Added secure WebSocket (`wss`) synchronization client support.
--   Added SNTP/NTP external clock-reference integration.
--   Added a shared versioned socket clock-synchronization protocol.
--   Added support for custom `IClockSynchronizationTarget`
-    implementations.
--   Added seven clock-synchronization examples.
-
-### Changed
-
--   Kept synchronization policy and clock discipline inside ESPressio
-    Timing.
--   Preserved Event Transport functionality from 0.1.0 and kept Timing
-    integration opt-in.
-
-## \[0.1.0\] - 2026-08-19
-
-### Added
-
--   Initial ESPressio Sockets release.
--   Added a dedicated IP/socket networking layer for ESPressio Event
-    Transport.
--   Added UDP Event Transport, including unicast, broadcast, and
-    multicast operation.
--   Added TCP client and multi-client TCP server Event Transports.
--   Added TLS Event Transport.
--   Added WebSocket client/server Event Transports, including secure
-    client support.
--   Added MQTT Event Transport.
--   Added stream framing for stream-oriented transports.
--   Added examples for the supported Event Transport mechanisms.
-
-### Changed
-
--   Kept Event routing/type policy in ESPressio Event rather than
-    embedding it in socket implementations.
--   Kept network-interface ownership outside Sockets so applications can
-    establish Wi-Fi/Ethernet independently.
