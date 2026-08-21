@@ -112,6 +112,7 @@ jobs:
           build_flags = -std=gnu++17 -frtti
           build_unflags = -std=gnu++11 -fno-rtti
           lib_ldf_mode = deep+
+          lib_ignore = WebSockets, PubSubClient
           lib_deps =
               ../dependencies/ESPressio-Observable
               ../dependencies/ESPressio-Units
