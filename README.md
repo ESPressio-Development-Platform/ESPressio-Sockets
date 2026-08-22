@@ -6,7 +6,7 @@ ESPressio Sockets concentrates **network I/O and socket framing** in one library
 
 ## Current Version — 0.7.1
 
-Sockets 0.7.1 adds compatibility with ESPressio Command 1.0.0's typed `CommandInvocation` values while preserving the existing Socket Command protocol-v1 wire representation. The Sockets core remains modular: Event, Command, Security, and Timing integrations are selected explicitly.
+Sockets 0.7.1 is the repository-relocation dependency patch for the Sockets 0.7 generation. It validates the migrated ESPressio dependency stack while preserving the existing Socket Command protocol-v1 wire representation and modular opt-in Event, Command, Security, and Timing integrations.
 
 The library provides reusable adapters around common IP/socket mechanisms without forcing application-level protocols to know the details of those mechanisms.
 
