@@ -1,6 +1,6 @@
 # ESPressio Sockets Command Integration
 
-ESPressio Sockets 0.7.0 provides opt-in integration with **ESPressio Command >= 1.0.0 < 2.0.0**.
+ESPressio Sockets 0.7.1 provides opt-in integration with **ESPressio Command >= 1.0.1 < 2.0.0**.
 
 Core ESPressio Sockets remains independent of ESPressio Command. Command support is activated only when the corresponding integration headers are selected.
 
@@ -11,7 +11,7 @@ ESPressio Sockets core
     -> no Command dependency
 
 Socket Command integration
-    - - -> ESPressio Command >= 1.0.0 < 2.0.0
+    - - -> ESPressio Command >= 1.0.1 < 2.0.0
 ```
 
 `SocketCommandSession` owns byte-stream framing, bounded request accumulation, socket-side metadata, policy hooks and result transport. ESPressio Command continues to own Command definition, parsing, typed parameter validation, routing and callback execution.
@@ -121,7 +121,7 @@ request.Invocation.named["state"] = true;
 
 ### Protocol-v1 compatibility
 
-The existing Sockets structured Command **wire protocol remains version 1**. It was originally defined using string-valued parameters, so Sockets 0.7.0 deliberately preserves that representation rather than introducing an incompatible wire revision.
+The existing Sockets structured Command **wire protocol remains version 1**. It was originally defined using string-valued parameters, so Sockets 0.7.1 deliberately preserves that representation rather than introducing an incompatible wire revision.
 
 At encode time:
 
@@ -275,8 +275,8 @@ A typical application may therefore receive a Command over TCP, perform the requ
 
 ```ini
 lib_deps =
-    espressio-development-platform/ESPressio-Sockets@^0.7.0
-    espressio-development-platform/ESPressio-Command@^1.0.0
+    espressio-development-platform/ESPressio-Sockets@^0.7.1
+    espressio-development-platform/ESPressio-Command@^1.0.1
 ```
 
 The existing Event and Timing dependencies remain required only when their corresponding Sockets integrations are selected.

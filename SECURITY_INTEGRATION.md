@@ -1,21 +1,21 @@
 # ESPressio Sockets Security Integration
 
-ESPressio Sockets 0.7.0 provides optional ESPressio Security integration for both stream-oriented and datagram-oriented socket mechanisms.
+ESPressio Sockets 0.7.1 provides optional ESPressio Security integration for both stream-oriented and datagram-oriented socket mechanisms.
 
 ## Dependency
 
 Core ESPressio Sockets remains independent of Security. Applications selecting the secure facilities must provide:
 
 ```text
-ESPressio Security >= 0.3.0 < 1.0.0
+ESPressio Security >= 0.3.1 < 1.0.0
 ```
 
 PlatformIO:
 
 ```ini
 lib_deps =
-    espressio-development-platform/ESPressio-Sockets@^0.7.0
-    espressio-development-platform/ESPressio-Security@^0.3.0
+    espressio-development-platform/ESPressio-Sockets@^0.7.1
+    espressio-development-platform/ESPressio-Security@^0.3.1
 ```
 
 ## Architecture

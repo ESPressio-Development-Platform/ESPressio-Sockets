@@ -4,15 +4,15 @@ Socket-based ESPressio transports, Command adapters, transport-security sessions
 
 ESPressio Sockets concentrates **network I/O and socket framing** in one library while allowing Event semantics, Commands, clock discipline and cryptography to remain owned by the libraries responsible for those concepts.
 
-## Current Version — 0.7.0
+## Current Version — 0.7.1
 
-Sockets 0.7.0 adds compatibility with ESPressio Command 1.0.0's typed `CommandInvocation` values while preserving the existing Socket Command protocol-v1 wire representation. The Sockets core remains modular: Event, Command, Security, and Timing integrations are selected explicitly.
+Sockets 0.7.1 is the repository-relocation dependency patch for the Sockets 0.7 generation. It validates the migrated ESPressio dependency stack while preserving the existing Socket Command protocol-v1 wire representation and modular opt-in Event, Command, Security, and Timing integrations.
 
 The library provides reusable adapters around common IP/socket mechanisms without forcing application-level protocols to know the details of those mechanisms.
 
 ```text
-Sockets 0.7.0
-    -> Observable >= 3.0.1 < 4.0.0
+Sockets 0.7.1
+    -> Observable >= 3.0.2 < 4.0.0
 ```
 
 ## Dependencies
@@ -20,25 +20,25 @@ Sockets 0.7.0
 Required:
 
 ```text
-ESPressio Observable >= 3.0.1 < 4.0.0
+ESPressio Observable >= 3.0.2 < 4.0.0
 ```
 
 Optional integrations:
 
 ```text
-Event >= 6.0.0 < 7.0.0
+Event >= 6.0.1 < 7.0.0
     socket Event Transport adapters
     Socket Event types
     SocketWorkerEventBridge
     SocketSecuritySessionEventBridge
 
-Command >= 1.0.0 < 2.0.0
+Command >= 1.0.1 < 2.0.0
     SocketCommandSession / TCPCommandServer
 
-Security >= 0.3.0 < 1.0.0
+Security >= 0.3.1 < 1.0.0
     SocketSecuritySession / SocketSecurityDatagram
 
-Timing >= 2.2.4 < 3.0.0
+Timing >= 2.2.5 < 3.0.0
     socket clock synchronization
 ```
 
@@ -52,8 +52,8 @@ Core Sockets:
 
 ```ini
 lib_deps =
-    espressio-development-platform/ESPressio-Sockets@^0.7.0
-    espressio-development-platform/ESPressio-Observable@^3.0.1
+    espressio-development-platform/ESPressio-Sockets@^0.7.1
+    espressio-development-platform/ESPressio-Observable@^3.0.2
 
 build_flags =
     -std=gnu++17

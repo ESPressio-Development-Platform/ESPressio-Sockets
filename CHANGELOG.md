@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.1 — 2026-08-22
+
+### Changed
+- Published the post-migration ESPressio Sockets package generation from `ESPressio-Development-Platform`.
+- Raised required Observable to `>=3.0.2 <4.0.0`.
+- Raised optional Event to `>=6.0.1 <7.0.0`, Command to `>=1.0.1 <2.0.0`, Security to `>=0.3.1 <1.0.0`, and Timing to `>=2.2.5 <3.0.0`.
+- Updated package metadata, integration documentation, CI validation, and dependency documentation.
+
+### Compatibility
+- No Sockets public API, protocol-v1 wire format, or runtime behaviour changes are introduced by this repository-relocation patch release.
+
 ## 0.7.0 — 2026-08-22
 
 ### Changed
