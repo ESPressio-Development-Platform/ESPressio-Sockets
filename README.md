@@ -1,6 +1,6 @@
 # ESPressio Sockets
 
-Socket-based ESPressio transports, Command adapters, transport-security sessions, and System Clock synchronization providers for the Flowduino ESPressio Development Platform.
+Socket-based ESPressio transports, Command adapters, transport-security sessions, and System Clock synchronization providers for the ESPressio Development Platform.
 
 ESPressio Sockets concentrates **network I/O and socket framing** in one library while allowing Event semantics, Commands, clock discipline and cryptography to remain owned by the libraries responsible for those concepts.
 
@@ -52,8 +52,8 @@ Core Sockets:
 
 ```ini
 lib_deps =
-    flowduino/ESPressio-Sockets@^0.6.0
-    flowduino/ESPressio-Observable@^3.0.1
+    espressio-development-platform/ESPressio-Sockets@^0.7.0
+    espressio-development-platform/ESPressio-Observable@^3.0.1
 
 build_flags =
     -std=gnu++17
@@ -135,8 +135,8 @@ Command       1.0.0
 Security      0.3.0
 Event         6.0.0
 Sockets       0.7.0
-ESP-Now       0.7.0
-Serial        0.7.0
+ESP-Now       0.8.0
+Serial        0.7.2
 ```
 
 For detailed remote Command usage, framing, policy hooks and examples, see [COMMAND_INTEGRATION.md](COMMAND_INTEGRATION.md).
