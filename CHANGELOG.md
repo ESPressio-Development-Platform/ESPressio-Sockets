@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.7.0 — 2026-08-22
+
+### Changed
+- Updated the opt-in ESPressio Command integration baseline to Command >= 1.0.0 < 2.0.0.
+- Adapted structured Socket Command protocol v1 to Command 1.0.0 `CommandValue` containers.
+- Native scalar `CommandValue` instances are normalized with `ToString()` at the existing protocol-v1 wire boundary and decoded as string-backed values, preserving interoperability with existing protocol-v1 peers.
+- Null `CommandValue` is rejected because protocol v1 has no null representation.
+- Added host and ESP32 validation against released ESPressio Command 1.0.0.
+- Updated package/component metadata, README, Command integration documentation, CI, and dependency charts for Sockets 0.7.0.
+
+### Compatibility
+- Core Sockets remains independent of ESPressio Command.
+- Socket Command line mode remains unchanged.
+- Structured Socket Command wire protocol version remains 1; no wire-format migration is required for existing peers.
+- Existing Event, Security, Timing and socket transport APIs remain unchanged.
+
+### Tracking
+- Implements #17.
+- Cascades ESPressio Command 1.0.0.
+
 ## 0.6.0 — 2026-08-21
 
 ### Added
