@@ -16,11 +16,11 @@ jobs:
             echo 'Core Sockets umbrella must not acquire optional integration headers.'
             exit 1
           fi
-      - name: Checkout ESPressio Command 0.4.0
+      - name: Checkout ESPressio Command 1.0.0
         uses: actions/checkout@v4
         with:
           repository: Flowduino/ESPressio-Command
-          ref: 0.4.0
+          ref: 1.0.0
           path: deps/ESPressio-Command
       - name: Checkout ESPressio Security 0.3.0
         uses: actions/checkout@v4
@@ -58,6 +58,63 @@ jobs:
         run: cmake --build build --parallel
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+  esp32-command-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: project/ESPressio-Sockets
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Observable
+          ref: 3.0.1
+          path: project/dependencies/ESPressio-Observable
+      - uses: actions/checkout@v4
+        with:
+          repository: Flowduino/ESPressio-Command
+          ref: 1.0.0
+          path: project/dependencies/ESPressio-Command
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install PlatformIO
+        run: pip install platformio
+      - name: Create Socket Command integration compile project
+        shell: bash
+        run: |
+          mkdir -p project/compile/src
+          cat > project/compile/platformio.ini <<'EOF'
+          [env:esp32]
+          platform = espressif32
+          board = esp32dev
+          framework = arduino
+          build_flags = -std=gnu++17 -frtti
+          build_unflags = -std=gnu++11 -fno-rtti
+          lib_ldf_mode = deep+
+          lib_ignore = WebSockets, PubSubClient
+          lib_deps =
+              ../dependencies/ESPressio-Observable
+              ../dependencies/ESPressio-Command
+              ../ESPressio-Sockets
+          EOF
+          cat > project/compile/src/main.cpp <<'EOF'
+          #include <Arduino.h>
+          #include <ESPressio_SocketCommandProtocol.hpp>
+          #include <ESPressio_SocketCommandSession.hpp>
+          void setup() {
+              ESPressio::Sockets::SocketCommandInvocationContext request;
+              request.Metadata.RequestID = 1;
+              request.Invocation.path = {"gpio", "write"};
+              request.Invocation.named["pin"] = 2;
+              request.Invocation.named["state"] = true;
+              std::vector<uint8_t> encoded;
+              ESPressio::Sockets::SocketCommandProtocol::EncodeRequest(request, encoded);
+          }
+          void loop() {}
+          EOF
+      - name: Compile Socket Command integration
+        run: pio run -d project/compile
 
   esp32-event-integration:
     runs-on: ubuntu-latest
