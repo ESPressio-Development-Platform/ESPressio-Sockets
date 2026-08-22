@@ -1,7 +1,7 @@
 #pragma once
 
 #if !__has_include(<ESPressio_Command.hpp>)
-#error "ESPressio Socket Command integration requires ESPressio Command >= 0.2.0 < 1.0.0."
+#error "ESPressio Socket Command integration requires ESPressio Command >= 1.0.0 < 2.0.0."
 #endif
 
 #include <cstddef>

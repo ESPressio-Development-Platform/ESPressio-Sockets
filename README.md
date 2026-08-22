@@ -4,40 +4,15 @@ Socket-based ESPressio transports, Command adapters, transport-security sessions
 
 ESPressio Sockets concentrates **network I/O and socket framing** in one library while allowing Event semantics, Commands, clock discipline and cryptography to remain owned by the libraries responsible for those concepts.
 
-## Current Version — 0.6.0
+## Current Version — 0.7.0
 
-Sockets 0.6.0 retains the 0.5 transport and adapter model and now owns the Event representations of its own socket-worker and socket-security-session lifecycle. The Sockets core remains modular: Event, Command, Security and Timing integrations are selected explicitly.
-
-## Why ESPressio Sockets?
+Sockets 0.7.0 adds compatibility with ESPressio Command 1.0.0's typed `CommandInvocation` values while preserving the existing Socket Command protocol-v1 wire representation. The Sockets core remains modular: Event, Command, Security, and Timing integrations are selected explicitly.
 
 The library provides reusable adapters around common IP/socket mechanisms without forcing application-level protocols to know the details of those mechanisms.
 
 ```text
-Application protocol
- Event / Command / Clock Sync / custom bytes
-                    |
-                    v
-              Sockets adapter
-                    |
-        +-----------+-----------+
-        |           |           |
-       UDP         TCP      WebSocket/MQTT
-```
-
-A component that uses an Event Transport, for example, can therefore think in Events rather than UDP datagrams or TCP connection state.
-
-## ESPressio Development Platform
-
-ESPressio libraries are discrete, composable components with explicit responsibility boundaries. Sockets owns IP/socket mechanics; Event owns Event semantics, Command owns Command definition/invocation, Timing owns clock discipline, and Security owns encryption/authentication/replay protection.
-
-## License
-
-Apache License 2.0. See [LICENSE](LICENSE).
-
-## Namespace
-
-```cpp
-ESPressio::Sockets
+Sockets 0.7.0
+    -> Observable >= 3.0.1 < 4.0.0
 ```
 
 ## Dependencies
@@ -57,7 +32,7 @@ Event >= 6.0.0 < 7.0.0
     SocketWorkerEventBridge
     SocketSecuritySessionEventBridge
 
-Command >= 0.4.0 < 1.0.0
+Command >= 1.0.0 < 2.0.0
     SocketCommandSession / TCPCommandServer
 
 Security >= 0.3.0 < 1.0.0
@@ -118,15 +93,19 @@ MQTT
 
 Event routing, Event identity, serialization and hop/origin semantics remain owned by ESPressio Event. Sockets only implements the concrete movement/framing required by the selected transport.
 
-The dependency direction is therefore:
+### Command 1.x structured values
+
+Command 1.0.0 allows structured callers to retain native scalar `CommandValue` types. Socket Command protocol v1 intentionally remains wire-compatible with existing peers: typed values are normalized with `CommandValue::ToString()` when encoded, then reconstructed as string-backed `CommandValue` instances on decode. Registry parameter validation/conversion remains authoritative when the invocation executes.
+
+This means existing protocol-v1 peers remain interoperable. Null `CommandValue` has no protocol-v1 representation and is rejected rather than silently encoded.
+
+## Dependency direction
 
 ```text
 Sockets Event integration - - -> Event
 ```
 
-and Event 6.0.0 does not depend back on Sockets.
-
-## Socket lifecycle Events
+Event 6.0.0 does not depend back on Sockets, so the previous reciprocal Event/Sockets edge remains removed.
 
 Sockets 0.6.0 owns the Event types and bridges representing its own Observable lifecycle:
 
@@ -147,22 +126,22 @@ The integration supports both line-oriented and structured requests while keepin
 Conceptually:
 
 ```text
-TCP/WebSocket input
-        |
-        v
-Socket Command adapter
-        |
-        v
-CommandInvocation
-        |
-        v
-CommandRegistry
-        |
-        v
-validated application callback
+Observable    3.0.1
+Serializable  0.10.2
+Units         0.2.3
+Timing        2.2.4
+Threads       3.1.4
+Command       1.0.0
+Security      0.3.0
+Event         6.0.0
+Sockets       0.7.0
+ESP-Now       0.7.0
+Serial        0.7.0
 ```
 
-This means the same Command tree can be used by Serial and network transports without duplicating parsing, validation, help metadata, or application callbacks.
+For detailed remote Command usage, framing, policy hooks and examples, see [COMMAND_INTEGRATION.md](COMMAND_INTEGRATION.md).
+
+See [ESPRESSIO_DEPENDENCY_CHART.md](ESPRESSIO_DEPENDENCY_CHART.md) and [CHANGELOG.md](CHANGELOG.md).
 
 See [COMMAND_INTEGRATION.md](COMMAND_INTEGRATION.md) for the complete Command-over-Sockets contract.
 

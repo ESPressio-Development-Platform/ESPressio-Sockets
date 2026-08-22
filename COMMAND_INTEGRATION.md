@@ -1,6 +1,6 @@
 # ESPressio Sockets Command Integration
 
-ESPressio Sockets 0.3.0 adds opt-in integration with **ESPressio Command >= 0.2.0 < 1.0.0**.
+ESPressio Sockets 0.7.0 provides opt-in integration with **ESPressio Command >= 1.0.0 < 2.0.0**.
 
 Core ESPressio Sockets remains independent of ESPressio Command. Command support is activated only when the corresponding integration headers are selected.
 
@@ -11,7 +11,7 @@ ESPressio Sockets core
     -> no Command dependency
 
 Socket Command integration
-    - - -> ESPressio Command >= 0.2.0 < 1.0.0
+    - - -> ESPressio Command >= 1.0.0 < 2.0.0
 ```
 
 `SocketCommandSession` owns byte-stream framing, bounded request accumulation, socket-side metadata, policy hooks and result transport. ESPressio Command continues to own Command definition, parsing, typed parameter validation, routing and callback execution.
@@ -108,6 +108,36 @@ Fragmented TCP reads are accumulated until a complete line is available. Multipl
 ## Structured-binary mode
 
 Machine callers can avoid manufacturing command-line text by sending a structured `CommandInvocation` representation.
+
+Command 1.0.0 allows positional and named invocation values to retain native scalar `CommandValue` types. Sockets accepts those typed invocations directly:
+
+```cpp
+Sockets::SocketCommandInvocationContext request;
+request.Metadata.RequestID = 42;
+request.Invocation.path = {"gpio", "write"};
+request.Invocation.named["pin"] = 2;
+request.Invocation.named["state"] = true;
+```
+
+### Protocol-v1 compatibility
+
+The existing Sockets structured Command **wire protocol remains version 1**. It was originally defined using string-valued parameters, so Sockets 0.7.0 deliberately preserves that representation rather than introducing an incompatible wire revision.
+
+At encode time:
+
+```text
+CommandValue -> CommandValue::ToString() -> protocol-v1 string
+```
+
+At decode time:
+
+```text
+protocol-v1 string -> string-backed CommandValue
+```
+
+The receiving Command Registry still performs the authoritative parameter conversion and validation, so values such as `"2"`, `"true"`, and `"0.5"` resolve through the same typed parameter definitions as before.
+
+This preserves interoperability with existing protocol-v1 peers. Native scalar type identity is not carried over protocol v1. A null `CommandValue` has no representation in protocol v1 and is rejected rather than silently converted.
 
 The version-1 request contains:
 
@@ -245,8 +275,8 @@ A typical application may therefore receive a Command over TCP, perform the requ
 
 ```ini
 lib_deps =
-    flowduino/ESPressio-Sockets@^0.3.0
-    flowduino/ESPressio-Command@^0.2.0
+    flowduino/ESPressio-Sockets@^0.7.0
+    flowduino/ESPressio-Command@^1.0.0
 ```
 
 The existing Event and Timing dependencies remain required only when their corresponding Sockets integrations are selected.

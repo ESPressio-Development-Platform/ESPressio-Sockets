@@ -59,6 +59,14 @@ inline bool AppendString32(std::vector<uint8_t>& out, const std::string& value) 
     return true;
 }
 
+inline bool AppendCommandValue16(
+    std::vector<uint8_t>& out,
+    const Command::CommandValue& value
+) {
+    if (value.IsNull()) return false;
+    return AppendString16(out, value.ToString());
+}
+
 class Reader {
 public:
     Reader(const uint8_t* data, std::size_t size) : data_(data), size_(size) {}
@@ -141,14 +149,19 @@ inline bool EncodeRequest(
         context.Invocation.named.size() > 0xFFFFU) return false;
 
     Detail::AppendU16(out, static_cast<uint16_t>(context.Invocation.path.size()));
-    for (const auto& item : context.Invocation.path) if (!Detail::AppendString16(out, item)) return false;
+    for (const auto& item : context.Invocation.path) {
+        if (!Detail::AppendString16(out, item)) return false;
+    }
 
     Detail::AppendU16(out, static_cast<uint16_t>(context.Invocation.positional.size()));
-    for (const auto& item : context.Invocation.positional) if (!Detail::AppendString16(out, item)) return false;
+    for (const auto& item : context.Invocation.positional) {
+        if (!Detail::AppendCommandValue16(out, item)) return false;
+    }
 
     Detail::AppendU16(out, static_cast<uint16_t>(context.Invocation.named.size()));
     for (const auto& item : context.Invocation.named) {
-        if (!Detail::AppendString16(out, item.first) || !Detail::AppendString16(out, item.second)) return false;
+        if (!Detail::AppendString16(out, item.first) ||
+            !Detail::AppendCommandValue16(out, item.second)) return false;
     }
 
     if (!Detail::AppendString32(out, context.Invocation.raw)) return false;
@@ -181,14 +194,17 @@ inline bool DecodeRequest(
     for (uint16_t i = 0; i < count; ++i) {
         std::string value;
         if (!reader.String16(value)) return false;
-        context.Invocation.positional.push_back(std::move(value));
+        context.Invocation.positional.emplace_back(std::move(value));
     }
 
     if (!reader.U16(count)) return false;
     for (uint16_t i = 0; i < count; ++i) {
         std::string key, value;
         if (!reader.String16(key) || !reader.String16(value)) return false;
-        context.Invocation.named[std::move(key)] = std::move(value);
+        context.Invocation.named.emplace(
+            std::move(key),
+            Command::CommandValue(std::move(value))
+        );
     }
 
     if (!reader.String32(context.Invocation.raw)) return false;
