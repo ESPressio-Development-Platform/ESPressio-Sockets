@@ -1,21 +1,21 @@
 # ESPressio Sockets Security Integration
 
-ESPressio Sockets 0.4.0 adds optional ESPressio Security 0.1.x integration for both stream-oriented and datagram-oriented socket mechanisms.
+ESPressio Sockets 0.7.0 provides optional ESPressio Security integration for both stream-oriented and datagram-oriented socket mechanisms.
 
 ## Dependency
 
 Core ESPressio Sockets remains independent of Security. Applications selecting the secure facilities must provide:
 
 ```text
-ESPressio Security >= 0.1.0 < 1.0.0
+ESPressio Security >= 0.3.0 < 1.0.0
 ```
 
 PlatformIO:
 
 ```ini
 lib_deps =
-    https://github.com/Flowduino/ESPressio-Sockets@^0.4.0
-    https://github.com/Flowduino/ESPressio-Security@^0.1.0
+    espressio-development-platform/ESPressio-Sockets@^0.7.0
+    espressio-development-platform/ESPressio-Security@^0.3.0
 ```
 
 ## Architecture
