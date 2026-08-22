@@ -1,19 +1,19 @@
-# ESPressio Dependency Chart — Sockets 0.6.0
+# ESPressio Dependency Chart — Sockets 0.7.0
 
 ![ESPressio Library Dependency Chart](ESPRESSIO_DEPENDENCY_CHART.svg)
 
-## Sockets 0.6.0
+## Sockets 0.7.0
 
 ```text
-Sockets 0.6.0
+Sockets 0.7.0
     -> Observable >= 3.0.1 < 4.0.0
     - - -> Event >= 6.0.0 < 7.0.0
-    - - -> Command >= 0.4.0 < 1.0.0
+    - - -> Command >= 1.0.0 < 2.0.0
     - - -> Security >= 0.3.0 < 1.0.0
     - - -> Timing >= 2.2.4 < 3.0.0
 ```
 
-Event covers concrete socket Event Transports plus Socket-owned lifecycle Event types and bridges. All four domain integrations remain opt-in.
+Event covers concrete socket Event Transports plus Socket-owned lifecycle Event types and bridges. Command 1.x integration includes line mode and structured protocol-v1 invocation with `CommandValue` normalization at the wire boundary. All four domain integrations remain opt-in.
 
 ## Final coordinated ecosystem
 
@@ -23,12 +23,12 @@ Serializable 0.10.2
 Units 0.2.3
 Timing 2.2.4
 Threads 3.1.4
-Command 0.4.0
+Command 1.0.0
 Security 0.3.0
 Event 6.0.0
-Sockets 0.6.0
-ESP-Now 0.6.0
-Serial 0.6.0
+Sockets 0.7.0
+ESP-Now 0.7.0
+Serial 0.7.0
 ```
 
 ## Circular-dependency status
