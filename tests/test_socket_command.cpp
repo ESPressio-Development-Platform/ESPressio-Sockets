@@ -29,6 +29,16 @@ static Sockets::SocketCommandResponse DecodeFramedResponse(const std::vector<uin
     return response;
 }
 
+static void AssertValueStrings(
+    const std::vector<Command::CommandValue>& values,
+    const std::vector<std::string>& expected
+) {
+    assert(values.size() == expected.size());
+    for (std::size_t index = 0; index < expected.size(); ++index) {
+        assert(values[index].ToString() == expected[index]);
+    }
+}
+
 int main() {
     {
         Command::CommandRegistry registry;
@@ -141,8 +151,8 @@ int main() {
         Sockets::SocketCommandInvocationContext request;
         request.Metadata.RequestID = 42;
         request.Invocation.path = {"math", "add"};
-        request.Invocation.positional = {"20", "22"};
-        request.Invocation.named["unused"] = "metadata-like-value";
+        request.Invocation.positional = {20, 22};
+        request.Invocation.named["unused"] = true;
         request.Invocation.raw = "machine request";
 
         std::vector<uint8_t> encoded;
@@ -151,12 +161,24 @@ int main() {
         assert(Sockets::SocketCommandProtocol::DecodeRequest(encoded.data(), encoded.size(), decoded));
         assert(decoded.Metadata.RequestID == 42);
         assert(decoded.Invocation.path == request.Invocation.path);
-        assert(decoded.Invocation.positional == request.Invocation.positional);
-        assert(decoded.Invocation.named == request.Invocation.named);
+        AssertValueStrings(decoded.Invocation.positional, {"20", "22"});
+        assert(decoded.Invocation.named.at("unused").ToString() == "true");
+        assert(decoded.Invocation.named.at("unused").GetType() == Command::CommandValue::Type::String);
         assert(decoded.Invocation.raw == request.Invocation.raw);
+
+        // Protocol v1 remains string-based at the wire boundary: native typed
+        // CommandValues are normalized on encode and decoded as string values.
+        assert(decoded.Invocation.positional[0].GetType() == Command::CommandValue::Type::String);
+        assert(decoded.Invocation.positional[1].GetType() == Command::CommandValue::Type::String);
+
+        // Null has no representation in the existing protocol-v1 string wire format.
+        request.Invocation.positional = {Command::CommandValue(nullptr)};
+        encoded.clear();
+        assert(!Sockets::SocketCommandProtocol::EncodeRequest(request, encoded));
 
         // Remove the deliberately unknown named argument before execution.
         request.Invocation.named.clear();
+        request.Invocation.positional = {20, 22};
         encoded.clear();
         assert(Sockets::SocketCommandProtocol::EncodeRequest(request, encoded));
         auto framed = Sockets::SocketCommandProtocol::FrameStructuredPayload(encoded);
@@ -200,12 +222,12 @@ int main() {
         // Multiple framed requests in one receive buffer.
         output.clear();
         request.Metadata.RequestID = 43;
-        request.Invocation.positional = {"1", "2"};
+        request.Invocation.positional = {1, 2};
         encoded.clear();
         assert(Sockets::SocketCommandProtocol::EncodeRequest(request, encoded));
         auto frame2 = Sockets::SocketCommandProtocol::FrameStructuredPayload(encoded);
         request.Metadata.RequestID = 44;
-        request.Invocation.positional = {"3", "4"};
+        request.Invocation.positional = {3, 4};
         encoded.clear();
         assert(Sockets::SocketCommandProtocol::EncodeRequest(request, encoded));
         auto frame3 = Sockets::SocketCommandProtocol::FrameStructuredPayload(encoded);
