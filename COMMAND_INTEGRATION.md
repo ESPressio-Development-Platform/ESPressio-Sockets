@@ -275,8 +275,8 @@ A typical application may therefore receive a Command over TCP, perform the requ
 
 ```ini
 lib_deps =
-    flowduino/ESPressio-Sockets@^0.7.0
-    flowduino/ESPressio-Command@^1.0.0
+    espressio-development-platform/ESPressio-Sockets@^0.7.0
+    espressio-development-platform/ESPressio-Command@^1.0.0
 ```
 
 The existing Event and Timing dependencies remain required only when their corresponding Sockets integrations are selected.

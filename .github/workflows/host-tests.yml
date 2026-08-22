@@ -19,31 +19,31 @@ jobs:
       - name: Checkout ESPressio Command 1.0.0
         uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Command
+          repository: ESPressio-Development-Platform/ESPressio-Command
           ref: 1.0.0
           path: deps/ESPressio-Command
       - name: Checkout ESPressio Security 0.3.0
         uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Security
+          repository: ESPressio-Development-Platform/ESPressio-Security
           ref: 0.3.0
           path: deps/ESPressio-Security
       - name: Checkout ESPressio Timing 2.2.4
         uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Timing
+          repository: ESPressio-Development-Platform/ESPressio-Timing
           ref: 2.2.4
           path: deps/ESPressio-Timing
       - name: Checkout ESPressio Units 0.2.3
         uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Units
+          repository: ESPressio-Development-Platform/ESPressio-Units
           ref: 0.2.3
           path: deps/ESPressio-Units
       - name: Checkout ESPressio Observable 3.0.1
         uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Observable
+          repository: ESPressio-Development-Platform/ESPressio-Observable
           ref: 3.0.1
           path: deps/ESPressio-Observable
       - name: Configure
@@ -67,12 +67,12 @@ jobs:
           path: project/ESPressio-Sockets
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Observable
+          repository: ESPressio-Development-Platform/ESPressio-Observable
           ref: 3.0.1
           path: project/dependencies/ESPressio-Observable
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Command
+          repository: ESPressio-Development-Platform/ESPressio-Command
           ref: 1.0.0
           path: project/dependencies/ESPressio-Command
       - uses: actions/setup-python@v5
@@ -124,32 +124,32 @@ jobs:
           path: project/ESPressio-Sockets
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Observable
+          repository: ESPressio-Development-Platform/ESPressio-Observable
           ref: 3.0.1
           path: project/dependencies/ESPressio-Observable
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Units
+          repository: ESPressio-Development-Platform/ESPressio-Units
           ref: 0.2.3
           path: project/dependencies/ESPressio-Units
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Timing
+          repository: ESPressio-Development-Platform/ESPressio-Timing
           ref: 2.2.4
           path: project/dependencies/ESPressio-Timing
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Threads
+          repository: ESPressio-Development-Platform/ESPressio-Threads
           ref: 3.1.4
           path: project/dependencies/ESPressio-Threads
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Security
+          repository: ESPressio-Development-Platform/ESPressio-Security
           ref: 0.3.0
           path: project/dependencies/ESPressio-Security
       - uses: actions/checkout@v4
         with:
-          repository: Flowduino/ESPressio-Event
+          repository: ESPressio-Development-Platform/ESPressio-Event
           ref: 6.0.0
           path: project/dependencies/ESPressio-Event
       - uses: actions/setup-python@v5

@@ -38,7 +38,7 @@
 
 ### Tracking
 - Implements #12.
-- Coordinated with Flowduino/ESPressio-Event#34.
+- Coordinated with ESPressio-Development-Platform/ESPressio-Event#34.
 
 ## 0.5.0 — 2026-08-20
 
