@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.7.2 — 2026-08-23
+
+### Changed
+- Raised optional Timing integration to `>=2.2.7 <3.0.0`.
+- Raised optional Event integration to `>=6.0.2 <7.0.0`.
+- Raised optional Command integration to `>=1.0.2 <2.0.0`.
+- Raised optional Security integration to `>=0.4.1 <1.0.0`.
+- Updated host and ESP32 integration validation to Units 0.2.6, Timing 2.2.7, Threads 3.1.6, Event 6.0.2, Command 1.0.2 and Security 0.4.1.
+- Updated package metadata and README for Sockets 0.7.2.
+
+### Architecture
+- Observable remains the only required ESPressio dependency.
+- Event, Command, Security and Timing integrations remain opt-in.
+- Core `ESPressio_Sockets.hpp` remains free of optional integration headers.
+
+### Compatibility
+- No Sockets public API or runtime behaviour changes.
+- Socket Command protocol-v1 wire representation remains unchanged.
+- Existing socket Event transports, synchronization, Command sessions and Security session/datagram semantics remain unchanged.
+
+### Tracking
+- Closes #26.
+
 ## 0.7.1 — 2026-08-22
 
 ### Changed
