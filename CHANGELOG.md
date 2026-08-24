@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.7.3 — 2026-08-24
+
+### Changed
+- Raised optional Timing integration to `>=2.2.8 <3.0.0`.
+- Raised optional Event integration to `>=6.0.3 <7.0.0`.
+- Raised optional Command integration to `>=1.0.3 <2.0.0`.
+- Raised optional Security integration to `>=0.4.2 <1.0.0`.
+- Updated host and ESP32 integration validation to Units 0.2.7, Timing 2.2.8, Threads 3.1.7, Event 6.0.3, Command 1.0.3 and Security 0.4.2.
+- Updated package, Arduino and component metadata for Sockets 0.7.3.
+- Updated README and dependency documentation for the Serializable 0.11.3 cascade generation.
+
+### Architecture
+- Observable remains the only required ESPressio dependency.
+- Event, Command, Security and Timing integrations remain opt-in.
+- Core `ESPressio_Sockets.hpp` remains free of optional integration headers.
+
+### Compatibility
+- No Sockets public API or runtime behaviour changes.
+- Socket Command protocol-v1 wire representation remains unchanged.
+- Existing socket Event transports, synchronization, Command sessions and Security session/datagram semantics remain unchanged.
+
+### Tracking
+- Closes #28.
+
 ## 0.7.2 — 2026-08-23
 
 ### Changed
@@ -61,7 +85,7 @@
 - Added Sockets-owned optional Event integration targeting ESPressio Event 6.0.0.
 
 ### Changed
-- Preserved the existing Socket Event bridge/header names in their new owning package.
+- Preserved the existing `ESPressio_SocketEvents.hpp` and `ESPressio_SocketWorkerEventBridge.hpp` public names in their new owning package.
 - Updated validated optional integration generation to Command 0.4.0, Security 0.3.0, Event 6.0.0, Timing 2.2.4, Units 0.2.3, and Observable 3.0.1.
 - Core `ESPressio_Sockets.hpp` remains free of Event-, Command-, Security-, and Timing-specific integration headers.
 - Updated package/component metadata, README, CI, and both dependency-chart forms for Sockets 0.6.0.
