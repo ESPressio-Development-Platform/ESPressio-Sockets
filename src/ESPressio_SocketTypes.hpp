@@ -21,7 +21,10 @@ struct IPv4Address {
     }
 
     constexpr bool operator==(const IPv4Address& other) const noexcept {
-        return Octets == other.Octets;
+        return Octets[0] == other.Octets[0] &&
+               Octets[1] == other.Octets[1] &&
+               Octets[2] == other.Octets[2] &&
+               Octets[3] == other.Octets[3];
     }
 
     constexpr bool operator!=(const IPv4Address& other) const noexcept {
