@@ -64,19 +64,27 @@ public:
                 return false;
             }
 
-            const std::size_t frameSize = sizeof(SocketStateFrameHeader) +
-                static_cast<std::size_t>(header.PayloadLength);
+            const std::size_t payloadSize = static_cast<std::size_t>(header.PayloadLength);
+            const std::size_t frameSize = sizeof(SocketStateFrameHeader) + payloadSize;
             if (_buffer.size() < frameSize) return true;
 
-            callback(
+            // Consume the frame before invoking application/session code. A callback may
+            // synchronously feed another frame into this decoder; leaving the current
+            // frame at the front of _buffer would cause that nested Push() to decode the
+            // same frame again. Keep the callback payload in independent storage so the
+            // nested Push() may freely mutate/reallocate _buffer without invalidating it.
+            std::vector<uint8_t> payload(payloadSize);
+            std::memcpy(
+                payload.data(),
                 _buffer.data() + sizeof(SocketStateFrameHeader),
-                static_cast<std::size_t>(header.PayloadLength)
+                payloadSize
             );
-
             _buffer.erase(
                 _buffer.begin(),
                 _buffer.begin() + static_cast<std::ptrdiff_t>(frameSize)
             );
+
+            callback(payload.data(), payload.size());
         }
     }
 
