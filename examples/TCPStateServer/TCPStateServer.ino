@@ -1,3 +1,4 @@
+#include <memory>
 #include <WiFi.h>
 
 #include <ESPressio_State.hpp>
@@ -17,10 +18,7 @@ struct OutputEnabled {
 
 using DeviceState = State::StateContract<DeviceTemperature, OutputEnabled>;
 
-State::DeviceIdentifier localDevice =
-    State::DeviceIdentifier::FromMacAddress(WiFi.macAddress().c_str()); // replace with your preferred stable device-ID construction
-
-State::StatePublisher<DeviceState> publisher(localDevice);
+std::unique_ptr<State::StatePublisher<DeviceState>> publisher;
 State::RemoteStateManager<DeviceState, 4> remoteState;
 State::StateSubscriptionRegistry<4> subscriptions;
 Sockets::TCPStateServer<DeviceState, 4, 4> stateServer;
@@ -35,13 +33,15 @@ void setup() {
     WiFi.begin("YOUR_SSID", "YOUR_PASSWORD");
     while (WiFi.status() != WL_CONNECTED) delay(100);
 
-    // In real code, construct a stable State::DeviceIdentifier for this device.
+    // DeviceIdentifier is transport-neutral. A MAC is convenient on ESP32,
+    // but applications may use any stable 128-bit identity scheme.
     uint8_t mac[6]{};
     WiFi.macAddress(mac);
-    localDevice = State::DeviceIdentifier::FromMacAddress(mac);
+    const auto localDevice = State::DeviceIdentifier::FromMacAddress(mac);
+    publisher = std::make_unique<State::StatePublisher<DeviceState>>(localDevice);
 
-    publisher.RegisterSource<DeviceTemperature>([] { return temperature; });
-    publisher.RegisterSource<OutputEnabled>([] { return outputEnabled; });
+    publisher->RegisterSource<DeviceTemperature>([] { return temperature; });
+    publisher->RegisterSource<OutputEnabled>([] { return outputEnabled; });
 
     // Request these State definitions from every connected remote device.
     subscriptions.Subscribe<DeviceTemperature>();
@@ -52,21 +52,25 @@ void setup() {
     config.MaximumClients = 4;
     config.Session.MaximumProtocolMessageBytes = 512;
 
-    if (!stateServer.Initialize(config, publisher, remoteState, subscriptions)) {
+    if (!stateServer.Initialize(config, *publisher, remoteState, subscriptions)) {
         Serial.println("Failed to start ESPressio TCP State server");
         return;
     }
 
-    Serial.printf("State server listening on %s:%u\n", WiFi.localIP().toString().c_str(), config.Port);
+    Serial.printf(
+        "State server listening on %s:%u\n",
+        WiFi.localIP().toString().c_str(),
+        config.Port
+    );
 }
 
 void loop() {
     // When authoritative local data changes, publish the newest value. Every
     // connected peer that subscribed to that State definition receives it.
     static uint32_t lastPublication = 0;
-    if (millis() - lastPublication >= 1000) {
+    if (publisher && millis() - lastPublication >= 1000) {
         lastPublication = millis();
-        publisher.Publish<DeviceTemperature>();
+        publisher->Publish<DeviceTemperature>();
     }
 
     delay(10);
