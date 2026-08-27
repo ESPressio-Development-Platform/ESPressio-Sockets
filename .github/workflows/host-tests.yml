@@ -16,6 +16,12 @@ jobs:
             echo 'Core Sockets umbrella must not acquire optional integration headers.'
             exit 1
           fi
+      - name: Checkout ESPressio System working branch
+        uses: actions/checkout@v4
+        with:
+          repository: ESPressio-Development-Platform/ESPressio-System
+          ref: feature/1-system-memory-policy
+          path: deps/ESPressio-System
       - name: Checkout ESPressio Command 1.0.3
         uses: actions/checkout@v4
         with:
@@ -28,27 +34,28 @@ jobs:
           repository: ESPressio-Development-Platform/ESPressio-Security
           ref: 0.4.2
           path: deps/ESPressio-Security
-      - name: Checkout ESPressio Timing 2.2.8
+      - name: Checkout ESPressio Timing working branch
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Timing
-          ref: 2.2.8
+          ref: feature/29-platform-clock-abstractions
           path: deps/ESPressio-Timing
-      - name: Checkout ESPressio Units 0.2.7
+      - name: Checkout ESPressio Units
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Units
-          ref: 0.2.7
+          ref: main
           path: deps/ESPressio-Units
-      - name: Checkout ESPressio Observable 3.0.2
+      - name: Checkout ESPressio Observable
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: 3.0.2
+          ref: feature/16-rtti-free-observer-registry
           path: deps/ESPressio-Observable
       - name: Configure
         run: >-
           cmake -S tests -B build
+          -DESPRESSIO_SYSTEM_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-System/src"
           -DESPRESSIO_COMMAND_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Command/src"
           -DESPRESSIO_SECURITY_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Security/src"
           -DESPRESSIO_TIMING_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Timing/src"
@@ -92,7 +99,6 @@ jobs:
           build_flags = -std=gnu++17 -frtti
           build_unflags = -std=gnu++11 -fno-rtti
           lib_ldf_mode = deep+
-          lib_ignore = WebSockets, PubSubClient
           lib_deps =
               ../dependencies/ESPressio-Observable
               ../dependencies/ESPressio-Command
@@ -124,34 +130,59 @@ jobs:
           path: project/ESPressio-Sockets
       - uses: actions/checkout@v4
         with:
+          repository: ESPressio-Development-Platform/ESPressio-System
+          ref: feature/1-system-memory-policy
+          path: project/dependencies/ESPressio-System
+      - uses: actions/checkout@v4
+        with:
           repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: 3.0.2
+          ref: feature/16-rtti-free-observer-registry
           path: project/dependencies/ESPressio-Observable
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Units
-          ref: 0.2.7
+          ref: main
           path: project/dependencies/ESPressio-Units
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Timing
-          ref: 2.2.8
+          ref: feature/29-platform-clock-abstractions
           path: project/dependencies/ESPressio-Timing
       - uses: actions/checkout@v4
         with:
+          repository: ESPressio-Development-Platform/ESPressio-Task
+          ref: feature/1-task-execution
+          path: project/dependencies/ESPressio-Task
+      - uses: actions/checkout@v4
+        with:
           repository: ESPressio-Development-Platform/ESPressio-Threads
-          ref: 3.1.7
+          ref: optimisation/69-resource-footprint
           path: project/dependencies/ESPressio-Threads
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Security
-          ref: 0.4.2
+          ref: optimisation/23-memory-policy-transient-buffers
           path: project/dependencies/ESPressio-Security
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Event
-          ref: 6.0.3
+          ref: feature/57-rtti-free-memory-efficiency
           path: project/dependencies/ESPressio-Event
+      - uses: actions/checkout@v4
+        with:
+          repository: ESPressio-Development-Platform/ESPressio-WiFi
+          ref: feature/20-wifi-off-mode
+          path: project/dependencies/ESPressio-WiFi
+      - uses: actions/checkout@v4
+        with:
+          repository: ESPressio-Development-Platform/ESPressio-Persistence
+          ref: feature/10-platform-storage-abstractions
+          path: project/dependencies/ESPressio-Persistence
+      - uses: actions/checkout@v4
+        with:
+          repository: ESPressio-Development-Platform/ESPressio-ESP32
+          ref: feature/1-system-memory-provider
+          path: project/dependencies/ESPressio-ESP32
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -169,23 +200,29 @@ jobs:
           build_flags = -std=gnu++17 -frtti
           build_unflags = -std=gnu++11 -fno-rtti
           lib_ldf_mode = deep+
-          lib_ignore = WebSockets, PubSubClient
           lib_deps =
+              ../dependencies/ESPressio-System
               ../dependencies/ESPressio-Observable
               ../dependencies/ESPressio-Units
               ../dependencies/ESPressio-Timing
+              ../dependencies/ESPressio-Task
               ../dependencies/ESPressio-Threads
               ../dependencies/ESPressio-Security
               ../dependencies/ESPressio-Event
+              ../dependencies/ESPressio-WiFi
+              ../dependencies/ESPressio-Persistence
               ../ESPressio-Sockets
+              ../dependencies/ESPressio-ESP32
           EOF
           cat > project/compile/src/main.cpp <<'EOF'
           #include <Arduino.h>
           #include <ESPressio_SocketEvents.hpp>
           #include <ESPressio_SocketWorkerEventBridge.hpp>
           #include <ESPressio_SocketSecuritySessionEventBridge.hpp>
+          #include <ESPressio_TCPClientEventTransport.hpp>
+          #include <ESPressio_TCPServerEventTransport.hpp>
           void setup() {}
           void loop() {}
           EOF
-      - name: Compile Socket Event integration against Event 6.0.3
+      - name: Compile TCP Socket Event adapters against coordinated abstraction branches
         run: pio run -d project/compile
