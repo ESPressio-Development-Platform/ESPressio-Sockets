@@ -213,17 +213,16 @@ jobs:
               ../dependencies/ESPressio-Persistence
               ../ESPressio-Sockets
               ../dependencies/ESPressio-ESP32
-              links2004/WebSockets@^2.3.6
-              knolleary/PubSubClient@^2.8
           EOF
           cat > project/compile/src/main.cpp <<'EOF'
           #include <Arduino.h>
           #include <ESPressio_SocketEvents.hpp>
           #include <ESPressio_SocketWorkerEventBridge.hpp>
           #include <ESPressio_SocketSecuritySessionEventBridge.hpp>
-          #include <ESPressio_ESP32SocketTransports.hpp>
+          #include <ESPressio_TCPClientEventTransport.hpp>
+          #include <ESPressio_TCPServerEventTransport.hpp>
           void setup() {}
           void loop() {}
           EOF
-      - name: Compile complete Socket Event adapter set against coordinated abstraction branches
+      - name: Compile TCP Socket Event adapters against coordinated abstraction branches
         run: pio run -d project/compile
