@@ -17,10 +17,11 @@ This file records Sockets changes made during the platform-abstraction tranche t
 - Socket transports continue to own their network-domain worker policy; the execution mechanism is now supplied by the installed platform provider.
 
 ### Concrete network adapters
-- `UDPEventTransport` now keeps conversion between portable `IPv4Address` and Arduino `IPAddress` local to the concrete WiFiUDP adapter.
-- TCP, TLS, WebSocket and MQTT concrete adapters still require a full target-integration audit. They must not force Arduino/ESP32 types back into shared public concepts.
-- The package remains advertised as Arduino/ESP32 until those concrete adapters are cleanly separated or conditionally packaged.
+- `UDPEventTransport` keeps conversion between portable `IPv4Address` and Arduino `IPAddress` local to the concrete WiFiUDP adapter while the broader adapter relocation proceeds.
+- The Arduino `TCPClientEventTransport` and `TCPServerEventTransport` concrete implementations have been relocated to ESPressio-ESP32. Their copies have been removed from ESPressio-Sockets so this repository no longer owns those Arduino `WiFiClient`/`WiFiServer` implementations.
+- TLS, WebSocket and MQTT concrete adapters still require a full target-integration audit. They must not force Arduino/ESP32 types back into shared public concepts.
+- The package remains advertised as Arduino/ESP32 until those remaining concrete adapters are cleanly separated or conditionally packaged.
 
 ## Boundary rule
 
-Socket protocols, framing, sessions and transport semantics belong in ESPressio-Sockets. Runtime execution belongs in System. Framework-specific network client/server implementations must stay at a clearly isolated concrete-adapter boundary and may ultimately move to ESPressio-ESP32 where that provides the cleaner ownership model.
+Socket protocols, framing, sessions and transport semantics belong in ESPressio-Sockets. Runtime execution belongs in System. Framework-specific network client/server implementations belong at the platform adapter boundary in ESPressio-ESP32 where they implement Sockets-owned protocol/domain contracts.
