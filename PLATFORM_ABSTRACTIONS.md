@@ -17,8 +17,9 @@ This file records Sockets changes made during the platform-abstraction tranche t
 - Socket transports continue to own their network-domain worker policy; the execution mechanism is now supplied by the installed platform provider.
 
 ### Concrete network adapters
-- `UDPEventTransport` keeps conversion between portable `IPv4Address` and Arduino `IPAddress` local to the concrete WiFiUDP adapter while the broader adapter relocation proceeds.
-- The Arduino `TCPClientEventTransport` and `TCPServerEventTransport` concrete implementations have been relocated to ESPressio-ESP32. Their copies have been removed from ESPressio-Sockets so this repository no longer owns those Arduino `WiFiClient`/`WiFiServer` implementations.
+- Relocated the Arduino `UDPEventTransport`, `TCPClientEventTransport` and `TCPServerEventTransport` concrete implementations to ESPressio-ESP32.
+- Their copies have been removed from ESPressio-Sockets, so this repository no longer owns the corresponding `WiFiUDP`, `WiFiClient` or `WiFiServer` implementations.
+- Portable `IPv4Address`, `SocketEndpoint`, socket worker policy, framing and Event transport semantics remain owned by ESPressio-Sockets.
 - TLS, WebSocket and MQTT concrete adapters still require a full target-integration audit. They must not force Arduino/ESP32 types back into shared public concepts.
 - The package remains advertised as Arduino/ESP32 until those remaining concrete adapters are cleanly separated or conditionally packaged.
 
