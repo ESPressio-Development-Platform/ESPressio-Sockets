@@ -17,11 +17,15 @@ This file records Sockets changes made during the platform-abstraction tranche t
 - Socket transports continue to own their network-domain worker policy; the execution mechanism is now supplied by the installed platform provider.
 
 ### Concrete network adapters
-- Relocated the Arduino `UDPEventTransport`, `TCPClientEventTransport` and `TCPServerEventTransport` concrete implementations to ESPressio-ESP32.
-- Their copies have been removed from ESPressio-Sockets, so this repository no longer owns the corresponding `WiFiUDP`, `WiFiClient` or `WiFiServer` implementations.
-- Portable `IPv4Address`, `SocketEndpoint`, socket worker policy, framing and Event transport semantics remain owned by ESPressio-Sockets.
-- TLS, WebSocket and MQTT concrete adapters still require a full target-integration audit. They must not force Arduino/ESP32 types back into shared public concepts.
-- The package remains advertised as Arduino/ESP32 until those remaining concrete adapters are cleanly separated or conditionally packaged.
+- Relocated Arduino `UDPEventTransport`, `TCPClientEventTransport`, `TCPServerEventTransport`, `TLSEventTransport`, `WebSocketClientEventTransport`, `WebSocketServerEventTransport` and `MQTTEventTransport` implementations to ESPressio-ESP32.
+- Their copies have been removed from ESPressio-Sockets, so this repository no longer owns `WiFiUDP`, `WiFiClient`, `WiFiServer`, `WiFiClientSecure`, Links2004 WebSocket or PubSubClient implementations.
+- Relocated TCP/TLS/MQTT reconnect timing uses the System monotonic clock rather than Arduino `millis()`.
+- Relocated TCP/TLS/WebSocket/MQTT configuration uses `std::string` rather than Arduino `String`.
+- Portable `IPv4Address`, `SocketEndpoint`, socket worker policy, framing, sessions, Command/Security/Timing integration and Event transport semantics remain owned by ESPressio-Sockets.
+
+### Package boundary
+- ESPressio-Sockets now advertises `frameworks: *` and `platforms: *`.
+- Links2004 WebSockets and PubSubClient are no longer dependencies of the portable Sockets package; ESPressio-ESP32 declares them because its concrete adapters consume them.
 
 ## Boundary rule
 
