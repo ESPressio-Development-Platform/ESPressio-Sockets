@@ -213,6 +213,8 @@ jobs:
               ../dependencies/ESPressio-Persistence
               ../ESPressio-Sockets
               ../dependencies/ESPressio-ESP32
+              links2004/WebSockets@^2.3.6
+              knolleary/PubSubClient@^2.8
           EOF
           cat > project/compile/src/main.cpp <<'EOF'
           #include <Arduino.h>
@@ -223,5 +225,5 @@ jobs:
           void setup() {}
           void loop() {}
           EOF
-      - name: Compile Socket Event integration against coordinated abstraction branches
+      - name: Compile complete Socket Event adapter set against coordinated abstraction branches
         run: pio run -d project/compile
