@@ -1,11 +1,13 @@
 # Platform Abstractions Audit Trail
 
-This file records Sockets changes made during the platform-abstraction tranche tracked by issue #32.
+This file records Sockets changes made during the platform-abstraction tranche, including the platform-boundary work tracked by issue #32 and State transport integration work tracked by issue #30.
 
 ## 2026-08-27
 
 ### Working branch
-- Created `feature/32-platform-network-abstractions` from `main` before making tranche changes.
+- The authoritative active working branch is `feature/state-transport-major-release`.
+- An intermediate #32 branch was identified as having been based on `main` instead of this active branch. No branch histories were merged or consolidated: the #32 result was replayed directly onto `feature/state-transport-major-release`, preserving the existing State transport work, and all subsequent work/validation has continued on this active branch.
+- Rollback branches remain untouched.
 
 ### Portable public concepts
 - Replaced Arduino `IPAddress` in `SocketEndpoint` with an ESPressio-owned `IPv4Address` value type.
@@ -26,6 +28,14 @@ This file records Sockets changes made during the platform-abstraction tranche t
 ### Package boundary
 - ESPressio-Sockets now advertises `frameworks: *` and `platforms: *`.
 - Links2004 WebSockets and PubSubClient are no longer dependencies of the portable Sockets package; ESPressio-ESP32 declares them because its concrete adapters consume them.
+
+### State transport integration
+- State-over-Sockets remains an opt-in Sockets-owned domain integration; ESPressio-State does not depend on Sockets.
+- The active State integration is validated against ESPressio-State `feature/1-state-foundation`.
+- A synchronous re-entrancy failure was isolated in `SocketStateFrameDecoder`: the decoder previously invoked the frame callback while the current frame was still present at the front of its internal receive buffer. A synchronous callback that fed another frame into the same decoder could therefore decode the outer frame again recursively.
+- The decoder now consumes the current frame before invoking downstream/session code and keeps the callback payload in independent storage so nested `Push()` calls cannot reprocess the outer frame or invalidate its payload.
+- Added a direct nested-`Push()` regression in addition to the full two-session State integration test.
+- The State integration workflow now uses a bounded execution timeout so future synchronous protocol deadlocks/recursion fail deterministically rather than occupying a CI runner indefinitely.
 
 ## Boundary rule
 
