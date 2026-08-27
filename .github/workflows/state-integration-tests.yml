@@ -45,4 +45,4 @@ jobs:
             -o state_socket_integration
 
       - name: Run State session integration
-        run: ./state_socket_integration
+        run: timeout 20s ./state_socket_integration
