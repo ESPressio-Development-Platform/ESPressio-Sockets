@@ -1,7 +1,7 @@
 {
     "name": "ESPressio-Sockets",
     "description": "Portable socket transport framing, Command adapters, Security sessions, Timing synchronization and network-domain worker infrastructure.",
-    "keywords": "sockets,udp,tcp,tls,websocket,mqtt,event,command,security,encryption,transport,network,timing,clock,synchronization,observable,platform-neutral,espressio",
+    "keywords": "sockets,udp,tcp,tls,mqtt,event,command,security,encryption,transport,network,timing,clock,synchronization,observable,platform-neutral,espressio",
     "authors": {"name": "Simon J. Stuart", "maintainer": true, "url": "https://espressio.org"},
     "homepage": "https://espressio.org",
     "build": {"flags": ["-std=gnu++17", "-DESPRESSIO_SOCKETS"]},
