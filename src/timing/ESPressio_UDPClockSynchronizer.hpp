@@ -10,6 +10,7 @@
 
 #include "../ESPressio_SocketWorker.hpp"
 #include "ESPressio_SocketClockSynchronizationProtocol.hpp"
+#include "ESPressio_UDPClockSynchronizationTypes.hpp"
 
 namespace ESPressio::Sockets {
 
@@ -125,12 +126,6 @@ private:
                 packet.size()
             );
 
-            /*
-             * This is intentionally captured immediately after the UDP read.
-             * Arduino's WiFiUDP API does not expose the lower-level packet
-             * arrival timestamp; the four-timestamp algorithm still removes
-             * symmetric network latency and most processing delay.
-             */
             const uint64_t receiveTime =
                 _protocol.GetLocalTimestamp();
 
@@ -320,4 +315,4 @@ public:
     }
 };
 
-}
+} // namespace ESPressio::Sockets
