@@ -11,7 +11,7 @@
     "frameworks": "*",
     "platforms": "*",
     "dependencies": [
-        {"name": "ESPressio-System", "version": "https://github.com/ESPressio-Development-Platform/ESPressio-System.git#feature/1-system-memory-policy"},
-        {"name": "ESPressio-Observable", "version": "https://github.com/ESPressio-Development-Platform/ESPressio-Observable.git#feature/16-rtti-free-observer-registry"}
+        {"name": "ESPressio-System", "version": "https://github.com/ESPressio-Development-Platform/ESPressio-System.git#rollback-20260830-2230"},
+        {"name": "ESPressio-Observable", "version": "https://github.com/ESPressio-Development-Platform/ESPressio-Observable.git#rollback-20260830-2230"}
     ]
 }
