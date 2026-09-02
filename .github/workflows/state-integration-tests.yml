@@ -17,21 +17,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-System
-          ref: feature/1-system-memory-policy
+          ref: main
           path: deps/system
 
       - name: Checkout Observable
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: feature/16-rtti-free-observer-registry
+          ref: main
           path: deps/observable
 
       - name: Checkout State
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-State
-          ref: feature/1-state-foundation
+          ref: main
           path: deps/state
 
       - name: Compile State session integration without RTTI
