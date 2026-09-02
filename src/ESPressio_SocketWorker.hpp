@@ -3,6 +3,7 @@
 #include <atomic>
 #include <memory>
 
+#include <ESPressio_Execution.hpp>
 #include <ESPressio_ThreadSafeObservable.hpp>
 
 #include "ESPressio_ISocketWorkerObserver.hpp"
@@ -28,7 +29,9 @@ private:
         void Stopped() { Notify([](ISocketWorkerObserver* observer){ observer->OnSocketWorkerStopped(); }); }
     };
 
-    TaskHandle_t _taskHandle = nullptr;
+    std::atomic<System::Execution::ExecutionHandle> _executionHandle{
+        System::Execution::InvalidExecutionHandle
+    };
     std::atomic<bool> _running{false};
     SocketWorkerConfig _config;
     std::shared_ptr<WorkerObservable> _observable = std::make_shared<WorkerObservable>();
@@ -36,57 +39,78 @@ private:
     static void TaskEntry(void* parameter) {
         auto* worker = static_cast<SocketWorker*>(parameter);
         if (worker != nullptr) worker->Run();
-        vTaskDelete(nullptr);
+        System::Execution::Provider().Destroy(
+            System::Execution::Provider().Current()
+        );
     }
 
     void Run() {
-        while (_running.load()) {
+        while (_running.load(std::memory_order_acquire)) {
             OnWorkerIteration();
             if (_config.IdleDelayMilliseconds > 0) {
-                vTaskDelay(pdMS_TO_TICKS(_config.IdleDelayMilliseconds));
+                System::Execution::Provider().SleepMilliseconds(
+                    _config.IdleDelayMilliseconds
+                );
             } else {
-                taskYIELD();
+                System::Execution::Provider().Yield();
             }
         }
-        _taskHandle = nullptr;
+        _executionHandle.store(
+            System::Execution::InvalidExecutionHandle,
+            std::memory_order_release
+        );
     }
 
 protected:
     virtual void OnWorkerIteration() = 0;
 
     bool StartWorker(const char* name, const SocketWorkerConfig& config) {
-        if (_running.load()) return true;
+        if (_running.load(std::memory_order_acquire)) return true;
 
         _config = config;
-        _running.store(true);
+        _running.store(true, std::memory_order_release);
 
-        const BaseType_t result = xTaskCreatePinnedToCore(
-            TaskEntry,
-            name,
-            config.StackSize,
+        System::Execution::ExecutionConfiguration execution;
+        execution.Name = name;
+        execution.StackSizeBytes = config.StackSize;
+        execution.Priority = config.Priority;
+        execution.Affinity = config.Affinity;
+
+        const auto result = System::Execution::Provider().Create(
+            &TaskEntry,
             this,
-            config.Priority,
-            &_taskHandle,
-            config.Core
+            execution
         );
 
-        if (result != pdPASS) {
-            _running.store(false);
-            _taskHandle = nullptr;
+        if (!result) {
+            _running.store(false, std::memory_order_release);
+            _executionHandle.store(
+                System::Execution::InvalidExecutionHandle,
+                std::memory_order_release
+            );
             _observable->StartFailed(name);
             return false;
         }
 
+        _executionHandle.store(result.Handle, std::memory_order_release);
         _observable->Started(name);
         return true;
     }
 
     void StopWorker() {
-        const bool wasRunning = _running.exchange(false);
+        const bool wasRunning = _running.exchange(false, std::memory_order_acq_rel);
+        const auto handle = _executionHandle.load(std::memory_order_acquire);
+        const auto current = System::Execution::Provider().Current();
 
-        if (_taskHandle != nullptr && xTaskGetCurrentTaskHandle() != _taskHandle) {
-            while (_taskHandle != nullptr) {
-                vTaskDelay(pdMS_TO_TICKS(1));
+        if (
+            handle != System::Execution::InvalidExecutionHandle &&
+            current != handle
+        ) {
+            while (
+                _executionHandle.load(std::memory_order_acquire) !=
+                    System::Execution::InvalidExecutionHandle
+            ) {
+                System::Execution::Provider().SleepMilliseconds(1);
             }
         }
 
@@ -104,7 +128,9 @@ public:
         _observable->UnregisterObserver(observer);
     }
 
-    bool GetWorkerIsRunning() const noexcept { return _running.load(); }
+    bool GetWorkerIsRunning() const noexcept {
+        return _running.load(std::memory_order_acquire);
+    }
 };
 
 } // namespace ESPressio::Sockets
