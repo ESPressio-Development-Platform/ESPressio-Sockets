@@ -12,22 +12,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-System
-          ref: feature/1-system-memory-policy
+          ref: main
           path: deps/ESPressio-System
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Command
-          ref: 1.0.3
+          ref: main
           path: deps/ESPressio-Command
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Security
-          ref: 0.4.2
+          ref: main
           path: deps/ESPressio-Security
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Timing
-          ref: feature/29-platform-clock-abstractions
+          ref: main
           path: deps/ESPressio-Timing
       - uses: actions/checkout@v4
         with:
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: feature/16-rtti-free-observer-registry
+          ref: main
           path: deps/ESPressio-Observable
       - name: Configure
         run: >-
@@ -60,12 +60,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Security
-          ref: 0.4.2
+          ref: main
           path: deps/ESPressio-Security
       - uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: 3.0.2
+          ref: main
           path: deps/ESPressio-Observable
       - name: Install PlatformIO
         run: pip install platformio
