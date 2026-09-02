@@ -4,13 +4,13 @@
 #define ESPRESSIO_SOCKETS_VERSION_MAJOR 0
 #endif
 #ifndef ESPRESSIO_SOCKETS_VERSION_MINOR
-#define ESPRESSIO_SOCKETS_VERSION_MINOR 7
+#define ESPRESSIO_SOCKETS_VERSION_MINOR 5
 #endif
 #ifndef ESPRESSIO_SOCKETS_VERSION_PATCH
-#define ESPRESSIO_SOCKETS_VERSION_PATCH 3
+#define ESPRESSIO_SOCKETS_VERSION_PATCH 0
 #endif
 #ifndef ESPRESSIO_SOCKETS_VERSION_STRING
-#define ESPRESSIO_SOCKETS_VERSION_STRING "0.7.3"
+#define ESPRESSIO_SOCKETS_VERSION_STRING "0.5.0"
 #endif
 
 #include "ESPressio_SocketTypes.hpp"
@@ -20,18 +20,20 @@
  * Dependency-bearing integrations are deliberately NOT batch-included here.
  * Include only the facilities required by the project.
  *
- * Portable lifecycle/session infrastructure:
+ * Observable lifecycle:
  *   ESPressio_SocketWorker.hpp
  *   ESPressio_ISocketWorkerObserver.hpp
  *   ESPressio_SocketSecuritySession.hpp
  *   ESPressio_ISocketSecuritySessionObserver.hpp
  *
- * Concrete Event transports are platform adapters. On ESP32 use:
- *   <ESPressio_ESP32SocketTransports.hpp>
- *
- * The historical ESPressio_SocketEventTransports.hpp umbrella is retained as
- * an optional compatibility forwarder when a platform adapter package is
- * available; ESPressio-Sockets itself does not depend on ESPressio-ESP32.
+ * Event transports:
+ *   ESPressio_UDPEventTransport.hpp
+ *   ESPressio_TCPClientEventTransport.hpp
+ *   ESPressio_TCPServerEventTransport.hpp
+ *   ESPressio_TLSEventTransport.hpp
+ *   ESPressio_WebSocketClientEventTransport.hpp
+ *   ESPressio_WebSocketServerEventTransport.hpp
+ *   ESPressio_MQTTEventTransport.hpp
  *
  * Timing:
  *   ESPressio_SocketClockSynchronization.hpp
@@ -42,7 +44,7 @@
  *   ESPressio_SocketCommandSession.hpp
  *   ESPressio_TCPCommandServer.hpp
  *
- * Security:
+ * Security (validated against ESPressio Security >=0.2.0 <1.0.0):
  *   ESPressio_SocketSecuritySession.hpp
  *   ESPressio_SocketSecurityDatagram.hpp
  *
