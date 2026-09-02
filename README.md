@@ -1,48 +1,47 @@
 # ESPressio Sockets
 
-Socket-based ESPressio transports, Command adapters, transport-security sessions, and System Clock synchronization providers for the ESPressio Development Platform.
+Socket-oriented ESPressio transports, framing, Command adapters, State sessions, transport-security sessions, and System Clock synchronization providers for the ESPressio Development Platform.
 
-ESPressio Sockets concentrates **network I/O and socket framing** in one library while allowing Event semantics, Commands, clock discipline and cryptography to remain owned by the libraries responsible for those concepts.
+ESPressio Sockets owns **generic non-Web socket concerns** such as TCP, UDP and socket-oriented framing. Web protocols are owned by ESPressio-Web. Event semantics, Commands, State semantics, clock discipline and cryptography remain owned by their respective domain libraries.
 
-## Current Version — 0.7.3
+## Active working-branch architecture
 
-Sockets 0.7.3 is a dependency-maintenance release aligning all optional ESPressio integration surfaces with the Serializable 0.11.3 cascade while preserving the existing Socket Command protocol-v1 wire representation and modular integration architecture.
+The active `feature/state-transport-major-release` branch includes transport-neutral State integration and the platform-abstraction work staged for the later coordinated release restructuring. The package version remains `0.7.3` during this development tranche; version changes are intentionally deferred.
+
+Core Sockets remains portable and depends only on ESPressio-System and ESPressio-Observable. Event, Command, State, Timing and Security integrations remain opt-in and are kept out of the normal `ESPressio_Sockets.hpp` umbrella unless their specific integration headers are included.
+
+WebSocket ownership has moved to ESPressio-Web. Sockets no longer owns WebSocket clients/servers, WebSocket Event transports, WebSocket clock-synchronization wrappers, WebSocket routes, or WebSocket platform dependencies. Reusable transport-neutral protocol/session machinery may still be consumed by ESPressio-Web where appropriate.
+
+## Current package version
 
 ```text
-Sockets 0.7.3
-    -> Observable >= 3.0.2 < 4.0.0
+ESPressio-Sockets 0.7.3
 ```
+
+The version is deliberately unchanged during the current platform restructuring.
 
 ## Dependencies
 
-Required:
+Required by the active working branch:
 
 ```text
-ESPressio Observable >= 3.0.2 < 4.0.0
+ESPressio System
+ESPressio Observable
 ```
 
-Optional integrations:
+Optional integrations include:
 
 ```text
-Event >= 6.0.3 < 7.0.0
-Command >= 1.0.3 < 2.0.0
-Security >= 0.4.2 < 1.0.0
-Timing >= 2.2.8 < 3.0.0
+Event
+Command
+State
+Security
+Timing
 ```
 
-External WebSocket/MQTT libraries remain associated only with the concrete adapters that use them.
+Concrete platform network adapters are supplied by architecture packages such as ESPressio-ESP32. WebSocket implementations and WebSocket-specific primitive adapters are supplied through ESPressio-Web and its platform implementation.
 
 See [ESPRESSIO_DEPENDENCY_CHART.md](ESPRESSIO_DEPENDENCY_CHART.md), [COMMAND_INTEGRATION.md](COMMAND_INTEGRATION.md), and [SECURITY_INTEGRATION.md](SECURITY_INTEGRATION.md).
-
-## Installation
-
-```ini
-lib_deps =
-    espressio-development-platform/ESPressio-Sockets@^0.7.3
-    espressio-development-platform/ESPressio-Observable@^3.0.2
-```
-
-Add Event, Command, Security, Timing, WebSocket or MQTT dependencies only when selecting those integrations.
 
 ## Header structure and opt-in integrations
 
@@ -52,78 +51,78 @@ The normal umbrella is:
 #include <ESPressio_Sockets.hpp>
 ```
 
-It deliberately does not pull in Event-, Command-, Security- or Timing-specific adapters. This keeps a simple socket application from paying for integrations it does not use.
+It deliberately does not pull in Event-, Command-, State-, Security- or Timing-specific adapters.
 
-# Event Transports
+## State integration
 
-Sockets supplies concrete ESPressio Event Transport adapters for UDP, TCP client/server, TLS, WebSocket and MQTT mechanisms. Event routing, Event identity, serialization and hop/origin semantics remain owned by ESPressio Event.
+`SocketStateSession` is a transport-neutral State session layered over a caller-supplied byte transport. Sockets owns framing and connection/session adaptation; ESPressio-State owns contracts, publishers, subscriptions, remote repositories, epochs/revisions, acknowledgement semantics and State protocol meaning.
 
-Sockets owns the Event types and bridges representing its own Observable lifecycle:
+A session binds an authoritative `StatePublisher`, a `RemoteStateManager`, and a `StateSubscriptionRegistry` to a send callback. Received stream bytes are passed to `session.Feed(...)`; framing supports fragmented stream delivery and rejects messages exceeding configured bounds.
 
-```cpp
-#include <ESPressio_SocketEvents.hpp>
-#include <ESPressio_SocketWorkerEventBridge.hpp>
-#include <ESPressio_SocketSecuritySessionEventBridge.hpp>
-```
+The integration preserves State ownership: local subscriptions are propagated, accepted subscriptions can yield immediate authoritative snapshots, later publications update remote repositories, acknowledgements preserve epoch/revision semantics, and teardown does not introduce a reverse dependency from State to Sockets.
 
-# Command integration
+## Event transports
 
-`SocketCommandSession` and `TCPCommandServer` allow an ESPressio Command tree to be invoked over socket connections. Command integration remains opt-in and is validated against Command 1.0.3.
+Socket-oriented ESPressio Event transport adapters cover mechanisms owned by the socket/platform layer, including UDP, TCP and TLS. MQTT remains a separate concrete network adapter where enabled.
 
-Socket Command protocol v1 remains wire-compatible: native scalar `CommandValue` values are normalized with `ToString()` at the existing wire boundary and decoded as string-backed values. Null has no protocol-v1 representation and remains rejected.
+WebSocket Event transport is **not** owned by Sockets; it is provided by ESPressio-Web and binds to an application-published WebSocket endpoint/client.
 
-# Clock synchronization
+Event routing, identity, serialization and hop/origin semantics remain owned by ESPressio-Event.
 
-Optional Timing integration carries clock-synchronization exchanges while Timing remains responsible for sample validation, estimation and SystemClock discipline. Sockets 0.7.3 validates this integration against Timing 2.2.8.
+Sockets-owned Observable lifecycle bridges remain available through their specific integration headers.
 
-# Transport Security
+## Command integration
 
-`SocketSecuritySession` and `SocketSecurityDatagram` bind stream/datagram semantics to ESPressio Security without implementing cryptography themselves. Security integration is validated against Security 0.4.2.
+`SocketCommandSession` and socket server adapters allow an ESPressio Command tree to be invoked over byte-oriented socket connections. `SocketCommandSession` intentionally remains transport-neutral: inbound bytes are supplied through `Feed(...)` and outbound bytes through a caller-provided writer.
 
-TLS and ESPressio Security continue to protect different boundaries: TLS protects a connection/session; ESPressio Security protects application transport payloads with protocol binding, sender/session identity and replay semantics.
+This makes the session reusable by ESPressio-Web without making Sockets own WebSocket protocol or routing semantics.
 
-# Observable lifecycle
+## Clock synchronization
+
+Optional Timing integration carries clock-synchronization exchanges while Timing remains responsible for sample validation, estimation and System Clock discipline.
+
+`SocketClockSynchronizationProtocol` remains in Sockets because its binary exchange protocol is reusable across socket transports and Web adapters. Its portable configuration/types are separated from UDP-specific `IPAddress` configuration so consumers such as ESPressio-Web do not inherit platform-specific UDP types.
+
+TCP and UDP synchronization providers remain in Sockets. WebSocket clock synchronization is provided by ESPressio-Web and reuses the portable protocol.
+
+## Transport Security
+
+`SocketSecuritySession` and `SocketSecurityDatagram` bind stream/datagram semantics to ESPressio-Security without implementing cryptography themselves.
+
+TLS and ESPressio-Security protect different boundaries: TLS protects a connection/session; ESPressio-Security protects application transport payloads with protocol binding, sender/session identity and replay semantics.
+
+## Observable lifecycle
 
 Sockets exposes synchronous Observable lifecycle surfaces for socket infrastructure. Applications requiring asynchronous Event representations can opt into the Sockets-owned Event bridges.
 
-# Serializable 0.11.3 cascade generation
+## Architectural guarantees
 
-```text
-Observable    3.0.2
-Serializable  0.11.3
-Units         0.2.7
-Timing        2.2.8
-Threads       3.1.7
-Event         6.0.3
-Command       1.0.3
-Security      0.4.2
-Persistence   0.3.2
-Sockets       0.7.3
-```
-
-# Compatibility and architectural guarantees
-
-- socket Event Transport APIs remain opt-in;
-- Command integration remains opt-in;
-- Timing synchronization remains opt-in;
-- Security integration remains opt-in;
-- the normal umbrella remains independent of those optional domains;
-- Socket Command protocol-v1 wire format is unchanged;
-- no Sockets runtime behaviour changes are introduced by 0.7.3.
+- core Sockets remains portable;
+- Sockets owns generic non-Web socket concerns, not Web protocols;
+- WebSocket ownership resides in ESPressio-Web;
+- Event, Command, State, Timing and Security integrations remain opt-in;
+- the normal umbrella remains independent of optional domain integrations;
+- State retains ownership of State-domain protocol/revision/subscription semantics;
+- target-specific network implementation is supplied through ESPressio platform providers rather than reusable Sockets code;
+- no backwards-compatibility forwarding header is retained for concrete socket Event transports during this forward-moving development tranche.
 
 The dependency direction remains:
 
 ```text
 Sockets Event integration - - -> Event
 Sockets Command integration - - -> Command
+Sockets State integration - - -> State
 Sockets Security integration - - -> Security
 Sockets Timing integration - - -> Timing
+
+Web may consume transport-neutral Sockets protocol/session machinery
+without transferring WebSocket ownership back to Sockets.
 ```
 
-# Testing
+## Testing
 
-Host and ESP32 validation exercise core socket facilities and optional integrations against the released Serializable 0.11.3 cascade, including secure stream/datagram handling, Command integration, synchronization protocols, lifecycle observation and Event bridge compilation.
+Host and target validation exercise core socket facilities and optional integrations. WebSocket-specific validation is now the responsibility of ESPressio-Web and the appropriate concrete platform package.
 
-# Changelog
+## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for release history and notable changes.

@@ -1,0 +1,48 @@
+name: State Integration Tests
+
+on:
+  push:
+    branches:
+      - feature/state-transport-major-release
+  pull_request:
+
+jobs:
+  host-state-session:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Sockets
+        uses: actions/checkout@v4
+
+      - name: Checkout System
+        uses: actions/checkout@v4
+        with:
+          repository: ESPressio-Development-Platform/ESPressio-System
+          ref: feature/1-system-memory-policy
+          path: deps/system
+
+      - name: Checkout Observable
+        uses: actions/checkout@v4
+        with:
+          repository: ESPressio-Development-Platform/ESPressio-Observable
+          ref: feature/16-rtti-free-observer-registry
+          path: deps/observable
+
+      - name: Checkout State
+        uses: actions/checkout@v4
+        with:
+          repository: ESPressio-Development-Platform/ESPressio-State
+          ref: feature/1-state-foundation
+          path: deps/state
+
+      - name: Compile State session integration without RTTI
+        run: |
+          g++ -std=c++17 -fno-rtti -pthread \
+            -Isrc \
+            -Ideps/system/src \
+            -Ideps/observable/src \
+            -Ideps/state/src \
+            tests/state_socket_integration.cpp \
+            -o state_socket_integration
+
+      - name: Run State session integration
+        run: timeout 20s ./state_socket_integration
