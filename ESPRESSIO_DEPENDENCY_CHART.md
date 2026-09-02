@@ -24,13 +24,13 @@ Serial        0.8.1
 
 ```text
 Sockets 0.7.3
-    -> Observable >= 3.0.2 < 4.0.0
+    -> Observable main
 
 Sockets optional integrations
-    - - -> Event >= 6.0.3 < 7.0.0
-    - - -> Command >= 1.0.3 < 2.0.0
-    - - -> Security >= 0.4.2 < 1.0.0
-    - - -> Timing >= 2.2.8 < 3.0.0
+    - - -> Event main
+    - - -> Command main
+    - - -> Security main
+    - - -> Timing main
 ```
 
 Observable remains the only required ESPressio dependency of core Sockets. Event, Command, Security and Timing integrations remain opt-in.
