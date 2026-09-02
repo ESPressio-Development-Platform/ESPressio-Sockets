@@ -5,12 +5,12 @@
 
 namespace ESPressio::Event {
 
-class SocketSecuritySessionFaultedEvent final : public TypedEvent<SocketSecuritySessionFaultedEvent> {
+class SocketSecuritySessionFaultedEvent final : public Event<> {
 public:
     const Security::SecurityResult Result;
     explicit SocketSecuritySessionFaultedEvent(const Security::SecurityResult& result) : Result(result) {}
 };
 
-class SocketSecuritySessionResetEvent final : public TypedEvent<SocketSecuritySessionResetEvent> {};
+class SocketSecuritySessionResetEvent final : public Event<> {};
 
 } // namespace ESPressio::Event

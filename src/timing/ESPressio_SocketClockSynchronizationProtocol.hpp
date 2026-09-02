@@ -7,7 +7,7 @@
 #include <functional>
 
 #include <ESPressio_IClockSynchronizationTarget.hpp>
-#include <ESPressio_TimingSystemClock.hpp>
+#include <ESPressio_SystemClock.hpp>
 
 #include "ESPressio_SocketClockSynchronizationTypes.hpp"
 
