@@ -17,21 +17,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-System
-          ref: main
+          ref: structural_realignment
           path: deps/system
 
       - name: Checkout Observable
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: main
+          ref: structural_realignment
           path: deps/observable
 
       - name: Checkout State
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-State
-          ref: main
+          ref: structural_realignment
           path: deps/state
 
       - name: Compile State session integration without RTTI
