@@ -22,6 +22,17 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - Port (uint16_t): 2 bytes [0 bytes dynamic allocation]
+ * - MaximumClients (std::size_t): 4 bytes [0 bytes dynamic allocation]
+ * - Session (SocketCommandSessionConfig): 12 bytes [0 bytes dynamic allocation]
+ * - Worker (SocketWorkerConfig): 12 bytes [0 bytes dynamic allocation]
+ * Total Memory: 32 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * End ESPressio Memory Audit
+ */
 struct TCPCommandServerConfig {
     uint16_t Port = 0;
     std::size_t MaximumClients = ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS;
@@ -29,6 +40,24 @@ struct TCPCommandServerConfig {
     SocketWorkerConfig Worker;
 };
 
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: sizeof(SocketWorkerConfig) + 4 bytes vptr [0 bytes dynamic allocation]
+ * Members:
+ * - _server (std::unique_ptr<WiFiServer>): 4 bytes [owned object: sizeof(WiFiServer)]
+ * - _clients (std::array<ClientState, ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS>): ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * 9 bytes known members + sizeof(WiFiClient) + 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) [elements may add: Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; elements may add: Session: _structured: Capacity * 1 bytes]
+ * - _config (TCPCommandServerConfig): 32 bytes [0 bytes dynamic allocation]
+ * - _registry (Command::CommandRegistry*): 4 bytes [0 bytes dynamic allocation]
+ * - _policy (SocketCommandPolicyHandler): sizeof(SocketCommandPolicyHandler) [0 bytes dynamic allocation]
+ * - _observer (SocketCommandResultObserver): sizeof(SocketCommandResultObserver) [0 bytes dynamic allocation]
+ * - _clientsMutex (std::mutex): sizeof(std::mutex) [0 bytes dynamic allocation]
+ * - _nextSessionID (uint64_t): 8 bytes [0 bytes dynamic allocation]
+ * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: sizeof(SocketWorkerConfig) + 4 bytes vptr + 49 bytes known members + ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * 9 bytes known members + sizeof(WiFiClient) + 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) + sizeof(std::mutex) [_server: owned object: sizeof(WiFiServer); _clients: elements may add: Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _clients: elements may add: Session: _structured: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class TCPCommandServer final : private SocketWorker {
 public:
     TCPCommandServer() = default;
@@ -125,7 +154,19 @@ protected:
     }
 
 private:
-    struct ClientState {
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - Client (WiFiClient): sizeof(WiFiClient) [0 bytes dynamic allocation]
+ * - Session (SocketCommandSession): 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) [_line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _structured: Capacity * 1 bytes]
+ * - ID (uint64_t): 8 bytes [0 bytes dynamic allocation]
+ * - Active (bool): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: 9 bytes known members + sizeof(WiFiClient) + 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) [Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; Session: _structured: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
+struct ClientState {
         WiFiClient Client;
         SocketCommandSession Session;
         uint64_t ID = 0;

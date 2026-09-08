@@ -19,6 +19,15 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - MaximumProtocolMessageBytes (std::size_t): 4 bytes [0 bytes dynamic allocation]
+ * - SendDisconnectOnShutdown (bool): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: 8 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * End ESPressio Memory Audit
+ */
 struct SocketStateSessionConfig final {
     std::size_t MaximumProtocolMessageBytes = 4096;
     State::DeviceIdentifier ExpectedRemoteDevice{};
@@ -29,6 +38,27 @@ using SocketStateSendHandler = std::function<bool(const uint8_t*, std::size_t)>;
 using SocketStatePeerBoundHandler = std::function<void(const State::DeviceIdentifier&)>;
 using SocketStateAcknowledgementHandler = std::function<void(const State::StateAcknowledgement&)>;
 
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: sizeof(State::IStatePublisherObserver) + sizeof(State::StatePublishedObserverPack<SocketStateSession<TContract, TMaximumRemoteDevices, TSubscriptionCapacity>, TContract>) + sizeof(State::IStateSubscriptionRegistryObserver) [0 bytes dynamic allocation]
+ * Members:
+ * - _publisher (Publisher*): 4 bytes [0 bytes dynamic allocation]
+ * - _remote (RemoteManager*): 4 bytes [0 bytes dynamic allocation]
+ * - _subscriptions (Subscriptions*): 4 bytes [0 bytes dynamic allocation]
+ * - _subscribers (State::StateSubscriberRegistry<TContract, 1>): sizeof(State::StateSubscriberRegistry<TContract, 1>) [0 bytes dynamic allocation]
+ * - _sendHandler (SocketStateSendHandler): sizeof(SocketStateSendHandler) [0 bytes dynamic allocation]
+ * - _peerBoundHandler (SocketStatePeerBoundHandler): sizeof(SocketStatePeerBoundHandler) [0 bytes dynamic allocation]
+ * - _acknowledgementHandler (SocketStateAcknowledgementHandler): sizeof(SocketStateAcknowledgementHandler) [0 bytes dynamic allocation]
+ * - _decoder (SocketStateFrameDecoder): 16 bytes [_buffer: Capacity * 1 bytes]
+ * - _publisherHandle (Observable::ObserverHandlePtr): sizeof(Observable::ObserverHandlePtr) [0 bytes dynamic allocation]
+ * - _subscriptionHandle (Observable::ObserverHandlePtr): sizeof(Observable::ObserverHandlePtr) [0 bytes dynamic allocation]
+ * - _mutex (std::recursive_mutex): sizeof(std::recursive_mutex) [0 bytes dynamic allocation]
+ * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: sizeof(State::IStatePublisherObserver) + sizeof(State::StatePublishedObserverPack<SocketStateSession<TContract, TMaximumRemoteDevices, TSubscriptionCapacity>, TContract>) + sizeof(State::IStateSubscriptionRegistryObserver) + 29 bytes known members + sizeof(State::StateSubscriberRegistry<TContract, 1>) + sizeof(SocketStateSendHandler) + sizeof(SocketStatePeerBoundHandler) + sizeof(SocketStateAcknowledgementHandler) + sizeof(Observable::ObserverHandlePtr) + sizeof(Observable::ObserverHandlePtr) + sizeof(std::recursive_mutex) [_decoder: _buffer: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 template<
     typename TContract,
     std::size_t TMaximumRemoteDevices,

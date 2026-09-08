@@ -14,10 +14,33 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - MaximumProtectedFrameBytes (std::size_t): 4 bytes [0 bytes dynamic allocation]
+ * Total Memory: 4 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * End ESPressio Memory Audit
+ */
 struct SocketSecuritySessionConfig {
     std::size_t MaximumProtectedFrameBytes = 65536;
 };
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - _security (Security::TransportSecurity&): 4 bytes [0 bytes dynamic allocation]
+ * - _writer (WriteCallback): sizeof(WriteCallback) [0 bytes dynamic allocation]
+ * - _config (SocketSecuritySessionConfig): 4 bytes [0 bytes dynamic allocation]
+ * - _receive (ReceiveCallback): sizeof(ReceiveCallback) [0 bytes dynamic allocation]
+ * - _failure (FailureCallback): sizeof(FailureCallback) [0 bytes dynamic allocation]
+ * - _buffer (std::vector<uint8_t>): 12 bytes [Capacity * 1 bytes]
+ * - _discarding (bool): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: 21 bytes known members + sizeof(WriteCallback) + sizeof(ReceiveCallback) + sizeof(FailureCallback) [_buffer: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class SocketSecuritySession final {
 public:
     using WriteCallback = std::function<bool(const uint8_t*, std::size_t)>;
@@ -25,7 +48,16 @@ public:
     using FailureCallback = std::function<void(const Security::SecurityResult&)>;
 
 private:
-    class SessionObservable final : public Observable::ThreadSafeObservable {
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: 4 bytes known bases + sizeof(std::enable_shared_from_this<ThreadSafeObservable>) + 4 bytes known members + sizeof(std::recursive_mutex) [0 bytes dynamic allocation]
+ * Members: none (empty object still occupies at least 1 byte unless empty-base optimisation applies).
+ * Total Memory: 4 bytes known bases + sizeof(std::enable_shared_from_this<ThreadSafeObservable>) + 4 bytes known members + sizeof(std::recursive_mutex) [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
+class SessionObservable final : public Observable::ThreadSafeObservable {
     private:
         template <typename Callback>
         void Notify(Callback&& callback) {

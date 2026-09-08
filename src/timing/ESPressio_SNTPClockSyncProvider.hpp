@@ -11,6 +11,17 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - Server (String): 12 bytes [Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * - UpdateIntervalMilliseconds (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - AdjustmentMode (Timing::ClockSynchronizationAdjustmentMode): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: 20 bytes [Server: Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: medium; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 struct SNTPClockSyncProviderConfig {
     String Server = "pool.ntp.org";
     uint32_t UpdateIntervalMilliseconds = 3600000;
@@ -20,6 +31,18 @@ struct SNTPClockSyncProviderConfig {
 };
 
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - _target (Timing::IClockSynchronizationTarget<Timing::ClockTick>*): 4 bytes [0 bytes dynamic allocation]
+ * - _config (SNTPClockSyncProviderConfig): 20 bytes [Server: Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
+ * - _mutex (std::mutex): sizeof(std::mutex) [0 bytes dynamic allocation]
+ * Total Memory: 25 bytes known members + sizeof(std::mutex) [_config: Server: Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class SNTPClockSyncProvider final {
 private:
     Timing::IClockSynchronizationTarget<Timing::ClockTick>* _target = nullptr;

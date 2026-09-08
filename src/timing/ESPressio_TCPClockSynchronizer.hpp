@@ -15,6 +15,19 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: 16 bytes [0 bytes dynamic allocation]
+ * Members:
+ * - Host (String): 12 bytes [Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * - Port (uint16_t): 2 bytes [0 bytes dynamic allocation]
+ * - ReconnectIntervalMilliseconds (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - Worker (SocketWorkerConfig): 12 bytes [0 bytes dynamic allocation]
+ * Total Memory: 48 bytes [Host: Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: medium; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 struct TCPClockSynchronizationClientConfig :
     public SocketClockSynchronizationConfig {
     String Host;
@@ -23,6 +36,16 @@ struct TCPClockSynchronizationClientConfig :
     SocketWorkerConfig Worker;
 };
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - Port (uint16_t): 2 bytes [0 bytes dynamic allocation]
+ * - MaximumClients (std::size_t): 4 bytes [0 bytes dynamic allocation]
+ * - Worker (SocketWorkerConfig): 12 bytes [0 bytes dynamic allocation]
+ * Total Memory: 20 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * End ESPressio Memory Audit
+ */
 struct TCPClockSynchronizationServerConfig {
     uint16_t Port = 45110;
     std::size_t MaximumClients = ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS;
@@ -30,6 +53,23 @@ struct TCPClockSynchronizationServerConfig {
 };
 
 
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: sizeof(SocketWorkerConfig) + 4 bytes vptr [0 bytes dynamic allocation]
+ * Members:
+ * - _client (WiFiClient): sizeof(WiFiClient) [0 bytes dynamic allocation]
+ * - _config (TCPClockSynchronizationClientConfig): 48 bytes [Host: Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * - _protocol (SocketClockSynchronizationProtocol): sizeof(SocketClockSynchronizationConfig) [0 bytes dynamic allocation]
+ * - _decoder (SocketEventFrameDecoder): 12 bytes [_buffer: Capacity * 1 bytes]
+ * - _lastConnectAttempt (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - _lastRequest (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
+ * - _mutex (std::mutex): sizeof(std::mutex) [0 bytes dynamic allocation]
+ * Total Memory: sizeof(SocketWorkerConfig) + 4 bytes vptr + 69 bytes known members + sizeof(WiFiClient) + sizeof(SocketClockSynchronizationConfig) + sizeof(std::mutex) [_config: Host: Capacity + 1 bytes (Arduino String backing buffer when allocated); _decoder: _buffer: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class TCPClockSynchronizationClient final :
     private SocketWorker {
 
@@ -256,11 +296,37 @@ public:
 };
 
 
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: sizeof(SocketWorkerConfig) + 4 bytes vptr [0 bytes dynamic allocation]
+ * Members:
+ * - _server (std::unique_ptr<WiFiServer>): 4 bytes [owned object: sizeof(WiFiServer)]
+ * - _clients (std::array<ClientState, ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS>): ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * 13 bytes known members + sizeof(WiFiClient) [elements may add: Decoder: _buffer: Capacity * 1 bytes]
+ * - _config (TCPClockSynchronizationServerConfig): 20 bytes [0 bytes dynamic allocation]
+ * - _protocol (SocketClockSynchronizationProtocol): sizeof(SocketClockSynchronizationConfig) [0 bytes dynamic allocation]
+ * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
+ * - _mutex (std::mutex): sizeof(std::mutex) [0 bytes dynamic allocation]
+ * Total Memory: sizeof(SocketWorkerConfig) + 4 bytes vptr + 25 bytes known members + ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * 13 bytes known members + sizeof(WiFiClient) + sizeof(SocketClockSynchronizationConfig) + sizeof(std::mutex) [_server: owned object: sizeof(WiFiServer); _clients: elements may add: Decoder: _buffer: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class TCPClockSynchronizationServer final :
     private SocketWorker {
 
 private:
-    struct ClientState {
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - Client (WiFiClient): sizeof(WiFiClient) [0 bytes dynamic allocation]
+ * - Decoder (SocketEventFrameDecoder): 12 bytes [_buffer: Capacity * 1 bytes]
+ * - Active (bool): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: 13 bytes known members + sizeof(WiFiClient) [Decoder: _buffer: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
+struct ClientState {
         WiFiClient Client;
         SocketEventFrameDecoder Decoder;
         bool Active = false;

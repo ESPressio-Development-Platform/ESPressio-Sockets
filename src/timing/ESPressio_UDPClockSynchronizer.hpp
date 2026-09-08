@@ -14,6 +14,22 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: sizeof(SocketWorkerConfig) + 4 bytes vptr [0 bytes dynamic allocation]
+ * Members:
+ * - _udp (WiFiUDP): sizeof(WiFiUDP) [0 bytes dynamic allocation]
+ * - _config (UDPClockSynchronizationConfig): sizeof(SocketClockSynchronizationConfig) + 12 bytes known members + sizeof(IPAddress) [0 bytes dynamic allocation]
+ * - _protocol (SocketClockSynchronizationProtocol): sizeof(SocketClockSynchronizationConfig) [0 bytes dynamic allocation]
+ * - _lastRequestMilliseconds (uint64_t): 8 bytes [0 bytes dynamic allocation]
+ * - _lastBroadcastMilliseconds (uint64_t): 8 bytes [0 bytes dynamic allocation]
+ * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
+ * - _mutex (std::mutex): sizeof(std::mutex) [0 bytes dynamic allocation]
+ * Total Memory: sizeof(SocketWorkerConfig) + 4 bytes vptr + 17 bytes known members + sizeof(WiFiUDP) + sizeof(SocketClockSynchronizationConfig) + 12 bytes known members + sizeof(IPAddress) + sizeof(SocketClockSynchronizationConfig) + sizeof(std::mutex) [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class UDPClockSynchronizer final :
     private SocketWorker {
 

@@ -10,6 +10,18 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - _security (Security::TransportSecurity&): 4 bytes [0 bytes dynamic allocation]
+ * - _sender (SendCallback): sizeof(SendCallback) [0 bytes dynamic allocation]
+ * - _receive (ReceiveCallback): sizeof(ReceiveCallback) [0 bytes dynamic allocation]
+ * - _failure (FailureCallback): sizeof(FailureCallback) [0 bytes dynamic allocation]
+ * Total Memory: 4 bytes known members + sizeof(SendCallback) + sizeof(ReceiveCallback) + sizeof(FailureCallback) [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class SocketSecurityDatagram final {
 public:
     using SendCallback = std::function<bool(const uint8_t*, std::size_t)>;

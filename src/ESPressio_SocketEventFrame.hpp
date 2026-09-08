@@ -10,6 +10,16 @@
 namespace ESPressio::Sockets {
 
 #pragma pack(push, 1)
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - Magic (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - Version (uint8_t): 1 bytes [0 bytes dynamic allocation]
+ * - PayloadLength (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * Total Memory: 12 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * End ESPressio Memory Audit
+ */
 struct SocketEventFrameHeader {
     static constexpr uint32_t MagicValue =
         0x4556534Bu; // EVSK
@@ -29,6 +39,15 @@ static_assert(
 );
 
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - _buffer (std::vector<uint8_t>): 12 bytes [Capacity * 1 bytes]
+ * Total Memory: 12 bytes [_buffer: Capacity * 1 bytes]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: medium; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 class SocketEventFrameDecoder {
 private:
     std::vector<uint8_t> _buffer;

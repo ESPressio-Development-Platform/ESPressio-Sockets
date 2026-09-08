@@ -18,6 +18,19 @@
 
 namespace ESPressio::Sockets {
 
+/**
+ * ESPressio Memory Audit
+ * Members:
+ * - Host (String): 12 bytes [Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * - Port (uint16_t): 2 bytes [0 bytes dynamic allocation]
+ * - ReconnectIntervalMilliseconds (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - Session (SocketStateSessionConfig): 8 bytes [0 bytes dynamic allocation]
+ * - Worker (SocketWorkerConfig): 12 bytes [0 bytes dynamic allocation]
+ * Total Memory: 40 bytes [Host: Capacity + 1 bytes (Arduino String backing buffer when allocated)]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: medium; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 template<
     typename TContract,
     std::size_t TMaximumRemoteDevices,
@@ -31,6 +44,23 @@ struct TCPStateClientConfig final {
     SocketWorkerConfig Worker;
 };
 
+/**
+ * ESPressio Memory Audit
+ * Inherited Memory Total: sizeof(SocketWorkerConfig) + 4 bytes vptr [0 bytes dynamic allocation]
+ * Members:
+ * - _client (WiFiClient): sizeof(WiFiClient) [0 bytes dynamic allocation]
+ * - _session (Session): sizeof(Session) [0 bytes dynamic allocation]
+ * - _publisher (Publisher*): 4 bytes [0 bytes dynamic allocation]
+ * - _remote (RemoteManager*): 4 bytes [0 bytes dynamic allocation]
+ * - _subscriptions (Subscriptions*): 4 bytes [0 bytes dynamic allocation]
+ * - _clientMutex (std::mutex): sizeof(std::mutex) [0 bytes dynamic allocation]
+ * - _lastConnectAttempt (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
+ * Total Memory: sizeof(SocketWorkerConfig) + 4 bytes vptr + 17 bytes known members + sizeof(WiFiClient) + sizeof(Session) + sizeof(std::mutex) [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * End ESPressio Memory Audit
+ */
 template<
     typename TContract,
     std::size_t TMaximumRemoteDevices,
