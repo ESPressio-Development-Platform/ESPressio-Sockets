@@ -23,9 +23,10 @@ namespace ESPressio::Sockets {
  * ESPressio Memory Audit
  * Members:
  * - MaximumProtocolMessageBytes (std::size_t): 4 bytes [0 bytes dynamic allocation]
+ * - ExpectedRemoteDevice (State::DeviceIdentifier): 16 bytes [0 bytes dynamic allocation]
  * - SendDisconnectOnShutdown (bool): 1 bytes [0 bytes dynamic allocation]
- * Total Memory: 8 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Total Memory: 24 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct SocketStateSessionConfig final {
@@ -40,22 +41,24 @@ using SocketStateAcknowledgementHandler = std::function<void(const State::StateA
 
 /**
  * ESPressio Memory Audit
- * Inherited Memory Total: sizeof(State::IStatePublisherObserver) + sizeof(State::StatePublishedObserverPack<SocketStateSession<TContract, TMaximumRemoteDevices, TSubscriptionCapacity>, TContract>) + sizeof(State::IStateSubscriptionRegistryObserver) [0 bytes dynamic allocation]
+ * Inherited Memory Total: sizeof(State::StatePublishedObserverPack<SocketStateSession<TContract, TMaximumRemoteDevices, TSubscriptionCapacity>, TContract>) (target/toolchain dependent) [0 bytes dynamic allocation]
  * Members:
  * - _publisher (Publisher*): 4 bytes [0 bytes dynamic allocation]
  * - _remote (RemoteManager*): 4 bytes [0 bytes dynamic allocation]
  * - _subscriptions (Subscriptions*): 4 bytes [0 bytes dynamic allocation]
- * - _subscribers (State::StateSubscriberRegistry<TContract, 1>): sizeof(State::StateSubscriberRegistry<TContract, 1>) [0 bytes dynamic allocation]
- * - _sendHandler (SocketStateSendHandler): sizeof(SocketStateSendHandler) [0 bytes dynamic allocation]
- * - _peerBoundHandler (SocketStatePeerBoundHandler): sizeof(SocketStatePeerBoundHandler) [0 bytes dynamic allocation]
- * - _acknowledgementHandler (SocketStateAcknowledgementHandler): sizeof(SocketStateAcknowledgementHandler) [0 bytes dynamic allocation]
- * - _decoder (SocketStateFrameDecoder): 16 bytes [_buffer: Capacity * 1 bytes]
- * - _publisherHandle (Observable::ObserverHandlePtr): sizeof(Observable::ObserverHandlePtr) [0 bytes dynamic allocation]
- * - _subscriptionHandle (Observable::ObserverHandlePtr): sizeof(Observable::ObserverHandlePtr) [0 bytes dynamic allocation]
- * - _mutex (std::recursive_mutex): sizeof(std::recursive_mutex) [0 bytes dynamic allocation]
+ * - _subscribers (State::StateSubscriberRegistry<TContract, 1>): 28 bytes [_subscribers: Capacity * (17 bytes known/aligned storage + TContract::StateCount * (1 bytes)) element storage; _mutex: native synchronization state may allocate platform resources lazily; _observerMutex: native synchronization state may allocate platform resources lazily; _observable: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 96 bytes; _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: enable_shared_from_this: embedded weak_ptr shares a control block when activated; _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 20 bytes; _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _mutex: native synchronization state may allocate platform resources lazily; _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _condition: native condition-variable state may allocate platform synchronization resources; _observable: pointee: ThreadSafeObservable: Observable: _registrations: Capacity * (12 bytes) element storage; _observable: pointee: ThreadSafeObservable: Observable: _bindings: Capacity * (12 bytes) element storage; _observable: pointee: ThreadSafeObservable: _mutex: _owned: owned object: 4 bytes; _observable: pointee: ThreadSafeObservable: _mutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily; _observable: pointee: ThreadSafeObservable: _notificationMutex: _owned: owned object: 4 bytes; _observable: pointee: ThreadSafeObservable: _notificationMutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily]
+ * - _config (SocketStateSessionConfig): 24 bytes [0 bytes dynamic allocation]
+ * - _sendHandler (SocketStateSendHandler): 4 bytes [0 bytes dynamic allocation]
+ * - _peerBoundHandler (SocketStatePeerBoundHandler): 4 bytes [0 bytes dynamic allocation]
+ * - _acknowledgementHandler (SocketStateAcknowledgementHandler): 4 bytes [0 bytes dynamic allocation]
+ * - _decoder (SocketStateFrameDecoder): 16 bytes [_buffer: Capacity * (1 bytes) element storage]
+ * - _publisherHandle (Observable::ObserverHandlePtr): 12 bytes [owned object: 4 bytes]
+ * - _subscriptionHandle (Observable::ObserverHandlePtr): 12 bytes [owned object: 4 bytes]
+ * - _remoteDevice (State::DeviceIdentifier): 16 bytes [0 bytes dynamic allocation]
+ * - _mutex (std::recursive_mutex): 4 bytes [native synchronization state may allocate platform resources lazily]
  * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
- * Total Memory: sizeof(State::IStatePublisherObserver) + sizeof(State::StatePublishedObserverPack<SocketStateSession<TContract, TMaximumRemoteDevices, TSubscriptionCapacity>, TContract>) + sizeof(State::IStateSubscriptionRegistryObserver) + 29 bytes known members + sizeof(State::StateSubscriberRegistry<TContract, 1>) + sizeof(SocketStateSendHandler) + sizeof(SocketStatePeerBoundHandler) + sizeof(SocketStateAcknowledgementHandler) + sizeof(Observable::ObserverHandlePtr) + sizeof(Observable::ObserverHandlePtr) + sizeof(std::recursive_mutex) [_decoder: _buffer: Capacity * 1 bytes]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Total Memory: 145 bytes known/aligned storage + sizeof(State::StatePublishedObserverPack<SocketStateSession<TContract, TMaximumRemoteDevices, TSubscriptionCapacity>, TContract>) (target/toolchain dependent) [_subscribers: _subscribers: Capacity * (17 bytes known/aligned storage + TContract::StateCount * (1 bytes)) element storage; _subscribers: _mutex: native synchronization state may allocate platform resources lazily; _subscribers: _observerMutex: native synchronization state may allocate platform resources lazily; _subscribers: _observable: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 96 bytes; _subscribers: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: enable_shared_from_this: embedded weak_ptr shares a control block when activated; _subscribers: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 20 bytes; _subscribers: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _mutex: native synchronization state may allocate platform resources lazily; _subscribers: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _condition: native condition-variable state may allocate platform synchronization resources; _subscribers: _observable: pointee: ThreadSafeObservable: Observable: _registrations: Capacity * (12 bytes) element storage; _subscribers: _observable: pointee: ThreadSafeObservable: Observable: _bindings: Capacity * (12 bytes) element storage; _subscribers: _observable: pointee: ThreadSafeObservable: _mutex: _owned: owned object: 4 bytes; _subscribers: _observable: pointee: ThreadSafeObservable: _mutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily; _subscribers: _observable: pointee: ThreadSafeObservable: _notificationMutex: _owned: owned object: 4 bytes; _subscribers: _observable: pointee: ThreadSafeObservable: _notificationMutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily; _decoder: _buffer: Capacity * (1 bytes) element storage; _publisherHandle: owned object: 4 bytes; _subscriptionHandle: owned object: 4 bytes; _mutex: native synchronization state may allocate platform resources lazily]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
  * End ESPressio Memory Audit
  */

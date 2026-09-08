@@ -20,17 +20,17 @@ namespace ESPressio::Sockets {
  * - _registry (Command::CommandRegistry*): 4 bytes [0 bytes dynamic allocation]
  * - _config (SocketCommandSessionConfig): 12 bytes [0 bytes dynamic allocation]
  * - _metadata (SocketCommandMetadata): 68 bytes [Transport: Capacity + 1 bytes when capacity exceeds 15-byte SSO; RemoteAddress: Capacity + 1 bytes when capacity exceeds 15-byte SSO]
- * - _writer (SocketCommandWriteHandler): sizeof(SocketCommandWriteHandler) [0 bytes dynamic allocation]
- * - _policy (SocketCommandPolicyHandler): sizeof(SocketCommandPolicyHandler) [0 bytes dynamic allocation]
- * - _observer (SocketCommandResultObserver): sizeof(SocketCommandResultObserver) [0 bytes dynamic allocation]
+ * - _writer (SocketCommandWriteHandler): 4 bytes [0 bytes dynamic allocation]
+ * - _policy (SocketCommandPolicyHandler): 4 bytes [0 bytes dynamic allocation]
+ * - _observer (SocketCommandResultObserver): 4 bytes [0 bytes dynamic allocation]
  * - _line (std::string): 24 bytes [Capacity + 1 bytes when capacity exceeds 15-byte SSO]
- * - _structured (std::vector<uint8_t>): 12 bytes [Capacity * 1 bytes]
+ * - _structured (std::vector<uint8_t>): 12 bytes [Capacity * (1 bytes) element storage]
  * - _discardUntilNewline (bool): 1 bytes [0 bytes dynamic allocation]
  * - _expectedStructuredBytes (uint32_t): 4 bytes [0 bytes dynamic allocation]
  * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
- * Total Memory: 126 bytes known members + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) [_metadata: Transport: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _metadata: RemoteAddress: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _structured: Capacity * 1 bytes]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
- * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
+ * Total Memory: 144 bytes [_metadata: Transport: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _metadata: RemoteAddress: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _structured: Capacity * (1 bytes) element storage]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
+ * Confidence: medium; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
  * End ESPressio Memory Audit
  */
 class SocketCommandSession final {

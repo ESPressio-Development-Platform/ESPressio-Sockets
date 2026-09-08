@@ -28,9 +28,9 @@ namespace ESPressio::Sockets {
  * - Port (uint16_t): 2 bytes [0 bytes dynamic allocation]
  * - MaximumClients (std::size_t): 4 bytes [0 bytes dynamic allocation]
  * - Session (SocketCommandSessionConfig): 12 bytes [0 bytes dynamic allocation]
- * - Worker (SocketWorkerConfig): 12 bytes [0 bytes dynamic allocation]
- * Total Memory: 32 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * - Worker (SocketWorkerConfig): 16 bytes [0 bytes dynamic allocation]
+ * Total Memory: 36 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct TCPCommandServerConfig {
@@ -42,19 +42,19 @@ struct TCPCommandServerConfig {
 
 /**
  * ESPressio Memory Audit
- * Inherited Memory Total: sizeof(SocketWorkerConfig) + 4 bytes vptr [0 bytes dynamic allocation]
+ * Inherited Memory Total: 36 bytes [SocketWorker: _observable: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 96 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: enable_shared_from_this: embedded weak_ptr shares a control block when activated; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 20 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _mutex: native synchronization state may allocate platform resources lazily; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _condition: native condition-variable state may allocate platform synchronization resources; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: _registrations: Capacity * (12 bytes) element storage; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: _bindings: Capacity * (12 bytes) element storage; SocketWorker: _observable: pointee: ThreadSafeObservable: _mutex: _owned: owned object: 4 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: _mutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily; SocketWorker: _observable: pointee: ThreadSafeObservable: _notificationMutex: _owned: owned object: 4 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: _notificationMutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily]
  * Members:
- * - _server (std::unique_ptr<WiFiServer>): 4 bytes [owned object: sizeof(WiFiServer)]
- * - _clients (std::array<ClientState, ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS>): ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * 9 bytes known members + sizeof(WiFiClient) + 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) [elements may add: Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; elements may add: Session: _structured: Capacity * 1 bytes]
- * - _config (TCPCommandServerConfig): 32 bytes [0 bytes dynamic allocation]
+ * - _server (std::unique_ptr<WiFiServer>): 4 bytes [owned object: sizeof(WiFiServer) (target/toolchain dependent)]
+ * - _clients (std::array<ClientState, ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS>): ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * (153 bytes known/aligned storage + sizeof(WiFiClient) (target/toolchain dependent)) [elements: Session: _metadata: Transport: Capacity + 1 bytes when capacity exceeds 15-byte SSO; elements: Session: _metadata: RemoteAddress: Capacity + 1 bytes when capacity exceeds 15-byte SSO; elements: Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; elements: Session: _structured: Capacity * (1 bytes) element storage]
+ * - _config (TCPCommandServerConfig): 36 bytes [0 bytes dynamic allocation]
  * - _registry (Command::CommandRegistry*): 4 bytes [0 bytes dynamic allocation]
- * - _policy (SocketCommandPolicyHandler): sizeof(SocketCommandPolicyHandler) [0 bytes dynamic allocation]
- * - _observer (SocketCommandResultObserver): sizeof(SocketCommandResultObserver) [0 bytes dynamic allocation]
- * - _clientsMutex (std::mutex): sizeof(std::mutex) [0 bytes dynamic allocation]
+ * - _policy (SocketCommandPolicyHandler): 4 bytes [0 bytes dynamic allocation]
+ * - _observer (SocketCommandResultObserver): 4 bytes [0 bytes dynamic allocation]
+ * - _clientsMutex (std::mutex): 4 bytes [native synchronization state may allocate platform resources lazily]
  * - _nextSessionID (uint64_t): 8 bytes [0 bytes dynamic allocation]
  * - _initialized (bool): 1 bytes [0 bytes dynamic allocation]
- * Total Memory: sizeof(SocketWorkerConfig) + 4 bytes vptr + 49 bytes known members + ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * 9 bytes known members + sizeof(WiFiClient) + 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) + sizeof(std::mutex) [_server: owned object: sizeof(WiFiServer); _clients: elements may add: Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _clients: elements may add: Session: _structured: Capacity * 1 bytes]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Total Memory: 101 bytes known/aligned storage + ESPRESSIO_SOCKETS_MAX_TCP_CLIENTS * (153 bytes known/aligned storage + sizeof(WiFiClient) (target/toolchain dependent)) [SocketWorker: _observable: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 96 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: enable_shared_from_this: embedded weak_ptr shares a control block when activated; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: shared control block (~12+ bytes; allocate_shared may co-locate object) + object 20 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _mutex: native synchronization state may allocate platform resources lazily; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: IUntypedObservable: IObservable: _lifetimeControl: pointee: _condition: native condition-variable state may allocate platform synchronization resources; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: _registrations: Capacity * (12 bytes) element storage; SocketWorker: _observable: pointee: ThreadSafeObservable: Observable: _bindings: Capacity * (12 bytes) element storage; SocketWorker: _observable: pointee: ThreadSafeObservable: _mutex: _owned: owned object: 4 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: _mutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily; SocketWorker: _observable: pointee: ThreadSafeObservable: _notificationMutex: _owned: owned object: 4 bytes; SocketWorker: _observable: pointee: ThreadSafeObservable: _notificationMutex: _fallback: _mutex: native synchronization state may allocate platform resources lazily; _server: owned object: sizeof(WiFiServer) (target/toolchain dependent); _clients: elements: Session: _metadata: Transport: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _clients: elements: Session: _metadata: RemoteAddress: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _clients: elements: Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _clients: elements: Session: _structured: Capacity * (1 bytes) element storage; _clientsMutex: native synchronization state may allocate platform resources lazily]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
  * End ESPressio Memory Audit
  */
@@ -157,12 +157,12 @@ private:
 /**
  * ESPressio Memory Audit
  * Members:
- * - Client (WiFiClient): sizeof(WiFiClient) [0 bytes dynamic allocation]
- * - Session (SocketCommandSession): 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) [_line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _structured: Capacity * 1 bytes]
+ * - Client (WiFiClient): sizeof(WiFiClient) (target/toolchain dependent) [0 bytes dynamic allocation]
+ * - Session (SocketCommandSession): 144 bytes [_metadata: Transport: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _metadata: RemoteAddress: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; _structured: Capacity * (1 bytes) element storage]
  * - ID (uint64_t): 8 bytes [0 bytes dynamic allocation]
  * - Active (bool): 1 bytes [0 bytes dynamic allocation]
- * Total Memory: 9 bytes known members + sizeof(WiFiClient) + 46 bytes known members + sizeof(SocketCommandSessionConfig) + sizeof(SocketCommandMetadata) + sizeof(SocketCommandWriteHandler) + sizeof(SocketCommandPolicyHandler) + sizeof(SocketCommandResultObserver) [Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; Session: _structured: Capacity * 1 bytes]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Total Memory: 153 bytes known/aligned storage + sizeof(WiFiClient) (target/toolchain dependent) [Session: _metadata: Transport: Capacity + 1 bytes when capacity exceeds 15-byte SSO; Session: _metadata: RemoteAddress: Capacity + 1 bytes when capacity exceeds 15-byte SSO; Session: _line: Capacity + 1 bytes when capacity exceeds 15-byte SSO; Session: _structured: Capacity * (1 bytes) element storage]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * Confidence: low; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
  * End ESPressio Memory Audit
  */

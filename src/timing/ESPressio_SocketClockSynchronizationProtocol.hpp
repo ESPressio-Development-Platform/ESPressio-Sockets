@@ -16,9 +16,12 @@ namespace ESPressio::Sockets {
 /**
  * ESPressio Memory Audit
  * Members:
+ * - _target (Timing::IClockSynchronizationTarget<Timing::ClockTick>*): 4 bytes [0 bytes dynamic allocation]
  * - _config (SocketClockSynchronizationConfig): 16 bytes [0 bytes dynamic allocation]
- * Total Memory: 16 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * - _nextSequence (std::atomic<uint32_t>): 4 bytes [0 bytes dynamic allocation]
+ * - _pendingSequence (std::atomic<uint32_t>): 4 bytes [0 bytes dynamic allocation]
+ * Total Memory: 28 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 class SocketClockSynchronizationProtocol {
@@ -27,18 +30,10 @@ public:
  * ESPressio Memory Audit
  * Underlying storage: 1 bytes
  * Total Memory: 1 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 enum
-/**
- * ESPressio Memory Audit
- * Inherited Memory Total: 1 bytes [0 bytes dynamic allocation]
- * Members: none (empty object still occupies at least 1 byte unless empty-base optimisation applies).
- * Total Memory: 1 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
- * End ESPressio Memory Audit
- */
 class MessageType : uint8_t {
         Request = 1,
         Response = 2,
@@ -55,7 +50,7 @@ class MessageType : uint8_t {
  * - Reserved (uint16_t): 2 bytes [0 bytes dynamic allocation]
  * - Sequence (uint32_t): 4 bytes [0 bytes dynamic allocation]
  * Total Memory: 12 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct MessageHeader {
@@ -73,7 +68,7 @@ struct MessageHeader {
  * - Header (MessageHeader): 12 bytes [0 bytes dynamic allocation]
  * - T1 (uint64_t): 8 bytes [0 bytes dynamic allocation]
  * Total Memory: 20 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct RequestMessage {
@@ -89,7 +84,7 @@ struct RequestMessage {
  * - T2 (uint64_t): 8 bytes [0 bytes dynamic allocation]
  * - T3 (uint64_t): 8 bytes [0 bytes dynamic allocation]
  * Total Memory: 36 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct ResponseMessage {
@@ -105,7 +100,7 @@ struct ResponseMessage {
  * - Header (MessageHeader): 12 bytes [0 bytes dynamic allocation]
  * - ReferenceTransmitTime (uint64_t): 8 bytes [0 bytes dynamic allocation]
  * Total Memory: 20 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct AuthoritativeBroadcastMessage {

@@ -10,9 +10,10 @@ namespace ESPressio::Sockets {
 
 /**
  * ESPressio Memory Audit
- * Members: none (empty object still occupies at least 1 byte unless empty-base optimisation applies).
- * Total Memory: 0 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Members:
+ * - Octets (std::array<uint8_t, 4>): 4 bytes [0 bytes dynamic allocation]
+ * Total Memory: 4 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct IPv4Address {
@@ -42,10 +43,10 @@ struct IPv4Address {
 /**
  * ESPressio Memory Audit
  * Members:
- * - Address (IPv4Address): 0 bytes [0 bytes dynamic allocation]
+ * - Address (IPv4Address): 4 bytes [0 bytes dynamic allocation]
  * - Port (uint16_t): 2 bytes [0 bytes dynamic allocation]
- * Total Memory: 2 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Total Memory: 6 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct SocketEndpoint {
@@ -74,9 +75,10 @@ struct SocketEndpoint {
  * Members:
  * - StackSize (uint32_t): 4 bytes [0 bytes dynamic allocation]
  * - Priority (uint32_t): 4 bytes [0 bytes dynamic allocation]
+ * - Affinity (System::ProcessorAffinity): 2 bytes [0 bytes dynamic allocation]
  * - IdleDelayMilliseconds (uint32_t): 4 bytes [0 bytes dynamic allocation]
- * Total Memory: 12 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI; GNU libstdc++ container control-block sizes are implementation-sensitive.
+ * Total Memory: 16 bytes [0 bytes dynamic allocation]
+ * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
  * End ESPressio Memory Audit
  */
 struct SocketWorkerConfig {
