@@ -15,7 +15,7 @@ WebSocket ownership has moved to ESPressio-Web. Sockets no longer owns WebSocket
 ## Current package version
 
 ```text
-ESPressio-Sockets 0.7.3
+ESPressio-Sockets
 ```
 
 The version is deliberately unchanged during the current platform restructuring.
@@ -41,7 +41,6 @@ Timing
 
 Concrete platform network adapters are supplied by architecture packages such as ESPressio-ESP32. WebSocket implementations and WebSocket-specific primitive adapters are supplied through ESPressio-Web and its platform implementation.
 
-See [ESPRESSIO_DEPENDENCY_CHART.md](ESPRESSIO_DEPENDENCY_CHART.md), [COMMAND_INTEGRATION.md](COMMAND_INTEGRATION.md), and [SECURITY_INTEGRATION.md](SECURITY_INTEGRATION.md).
 
 ## Header structure and opt-in integrations
 
@@ -122,7 +121,3 @@ without transferring WebSocket ownership back to Sockets.
 ## Testing
 
 Host and target validation exercise core socket facilities and optional integrations. WebSocket-specific validation is now the responsibility of ESPressio-Web and the appropriate concrete platform package.
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for release history and notable changes.

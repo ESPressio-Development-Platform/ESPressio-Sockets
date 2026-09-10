@@ -1,6 +1,6 @@
 # ESPressio Sockets Command Integration
 
-ESPressio Sockets 0.7.1 provides opt-in integration with **ESPressio Command >= 1.0.1 < 2.0.0**.
+ESPressio Sockets provides opt-in integration with **ESPressio Command**.
 
 Core ESPressio Sockets remains independent of ESPressio Command. Command support is activated only when the corresponding integration headers are selected.
 
@@ -11,7 +11,7 @@ ESPressio Sockets core
     -> no Command dependency
 
 Socket Command integration
-    - - -> ESPressio Command >= 1.0.1 < 2.0.0
+    - - -> ESPressio Command
 ```
 
 `SocketCommandSession` owns byte-stream framing, bounded request accumulation, socket-side metadata, policy hooks and result transport. ESPressio Command continues to own Command definition, parsing, typed parameter validation, routing and callback execution.
@@ -67,8 +67,8 @@ Sockets::TCPCommandServer server;
 
 auto& commands = Command::CommandRegistry::GetInstance();
 commands.Command("system")
-    .Command("status")
-    .OnExecute([](const Command::CommandContext&) {
+.Command("status")
+.OnExecute([](const Command::CommandContext&) {
         return Command::CommandResult::Ok("System OK");
     });
 
@@ -109,7 +109,7 @@ Fragmented TCP reads are accumulated until a complete line is available. Multipl
 
 Machine callers can avoid manufacturing command-line text by sending a structured `CommandInvocation` representation.
 
-Command 1.0.0 allows positional and named invocation values to retain native scalar `CommandValue` types. Sockets accepts those typed invocations directly:
+Command allows positional and named invocation values to retain native scalar `CommandValue` types. Sockets accepts those typed invocations directly:
 
 ```cpp
 Sockets::SocketCommandInvocationContext request;
@@ -121,7 +121,7 @@ request.Invocation.named["state"] = true;
 
 ### Protocol-v1 compatibility
 
-The existing Sockets structured Command **wire protocol remains version 1**. It was originally defined using string-valued parameters, so Sockets 0.7.1 deliberately preserves that representation rather than introducing an incompatible wire revision.
+The existing Sockets structured Command **wire protocol remains version 1**. It was originally defined using string-valued parameters, so Sockets deliberately preserves that representation rather than introducing an incompatible wire revision.
 
 At encode time:
 
