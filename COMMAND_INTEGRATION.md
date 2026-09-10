@@ -275,8 +275,8 @@ A typical application may therefore receive a Command over TCP, perform the requ
 
 ```ini
 lib_deps =
-    espressio-development-platform/ESPressio-Sockets@^0.7.1
-    espressio-development-platform/ESPressio-Command@^1.0.1
+    https://github.com/ESPressio-Development-Platform/ESPressio-Sockets.git#primitives_redesign
+    https://github.com/ESPressio-Development-Platform/ESPressio-Command.git#primitives_redesign
 ```
 
 The existing Event and Timing dependencies remain required only when their corresponding Sockets integrations are selected.

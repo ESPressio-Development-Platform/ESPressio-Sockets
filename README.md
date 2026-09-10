@@ -6,13 +6,13 @@ ESPressio Sockets owns **generic non-Web socket concerns** such as TCP, UDP and 
 
 ## Active working-branch architecture
 
-The active `feature/state-transport-major-release` branch includes transport-neutral State integration and the platform-abstraction work staged for the later coordinated release restructuring. The package version remains `0.7.3` during this development tranche; version changes are intentionally deferred.
+The active working branch includes transport-neutral State integration and the platform-abstraction work for the coordinated structural redesign.
 
 Core Sockets remains portable and depends only on ESPressio-System and ESPressio-Observable. Event, Command, State, Timing and Security integrations remain opt-in and are kept out of the normal `ESPressio_Sockets.hpp` umbrella unless their specific integration headers are included.
 
 WebSocket ownership has moved to ESPressio-Web. Sockets no longer owns WebSocket clients/servers, WebSocket Event transports, WebSocket clock-synchronization wrappers, WebSocket routes, or WebSocket platform dependencies. Reusable transport-neutral protocol/session machinery may still be consumed by ESPressio-Web where appropriate.
 
-## Current package version
+## Package
 
 ```text
 ESPressio-Sockets
