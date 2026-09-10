@@ -5,17 +5,7 @@
 
 using namespace ESPressio;
 
-/**
- * ESPressio Memory Audit
- * Inherited Memory Total: 4 bytes [0 bytes dynamic allocation]
- * Members:
- * - Now (uint64_t): 8 bytes [0 bytes dynamic allocation]
- * - LastSample (Timing::ClockSynchronizationSample<Timing::ClockTick>): 32 bytes [0 bytes dynamic allocation]
- * - Submitted (bool): 1 bytes [0 bytes dynamic allocation]
- * Total Memory: 48 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 class FakeTarget final :
     public Timing::IClockSynchronizationTarget<Timing::ClockTick> {
 public:

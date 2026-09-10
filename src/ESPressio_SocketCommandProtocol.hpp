@@ -67,16 +67,7 @@ inline bool AppendCommandValue16(
     return AppendString16(out, value.ToString());
 }
 
-/**
- * ESPressio Memory Audit
- * Members:
- * - data_ (uint8_t*): 4 bytes [0 bytes dynamic allocation]
- * - size_ (std::size_t): 4 bytes [0 bytes dynamic allocation]
- * - offset_ (std::size_t): 4 bytes [0 bytes dynamic allocation]
- * Total Memory: 12 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 class Reader {
 public:
     Reader(const uint8_t* data, std::size_t size) : data_(data), size_(size) {}

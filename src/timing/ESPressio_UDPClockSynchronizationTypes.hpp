@@ -7,23 +7,7 @@
 
 namespace ESPressio::Sockets {
 
-/**
- * ESPressio Memory Audit
- * Inherited Memory Total: 16 bytes [0 bytes dynamic allocation]
- * Members:
- * - LocalPort (uint16_t): 2 bytes [0 bytes dynamic allocation]
- * - ReferencePort (uint16_t): 2 bytes [0 bytes dynamic allocation]
- * - ReferenceAddress (IPAddress): 4 bytes [0 bytes dynamic allocation]
- * - EnableAuthoritativeBroadcast (bool): 1 bytes [0 bytes dynamic allocation]
- * - BroadcastAddress (IPAddress): 4 bytes [0 bytes dynamic allocation]
- * - BroadcastIntervalMilliseconds (uint32_t): 4 bytes [0 bytes dynamic allocation]
- * - EnableAuthoritativeMulticast (bool): 1 bytes [0 bytes dynamic allocation]
- * - MulticastGroup (IPAddress): 4 bytes [0 bytes dynamic allocation]
- * - MulticastPort (uint16_t): 2 bytes [0 bytes dynamic allocation]
- * Total Memory: 48 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 struct UDPClockSynchronizationConfig :
     public SocketClockSynchronizationConfig {
 

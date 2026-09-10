@@ -13,26 +13,10 @@
 
 namespace ESPressio::Sockets {
 
-/**
- * ESPressio Memory Audit
- * Members:
- * - _target (Timing::IClockSynchronizationTarget<Timing::ClockTick>*): 4 bytes [0 bytes dynamic allocation]
- * - _config (SocketClockSynchronizationConfig): 16 bytes [0 bytes dynamic allocation]
- * - _nextSequence (std::atomic<uint32_t>): 4 bytes [0 bytes dynamic allocation]
- * - _pendingSequence (std::atomic<uint32_t>): 4 bytes [0 bytes dynamic allocation]
- * Total Memory: 28 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 class SocketClockSynchronizationProtocol {
 public:
-/**
- * ESPressio Memory Audit
- * Underlying storage: 1 bytes
- * Total Memory: 1 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 enum
 class MessageType : uint8_t {
         Request = 1,
@@ -41,18 +25,7 @@ class MessageType : uint8_t {
     };
 
 #pragma pack(push, 1)
-/**
- * ESPressio Memory Audit
- * Members:
- * - Magic (uint32_t): 4 bytes [0 bytes dynamic allocation]
- * - Version (uint8_t): 1 bytes [0 bytes dynamic allocation]
- * - Type (uint8_t): 1 bytes [0 bytes dynamic allocation]
- * - Reserved (uint16_t): 2 bytes [0 bytes dynamic allocation]
- * - Sequence (uint32_t): 4 bytes [0 bytes dynamic allocation]
- * Total Memory: 12 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 struct MessageHeader {
         static constexpr uint32_t MagicValue = 0x53434C4Bu; // SCLK
         uint32_t Magic = MagicValue;
@@ -62,31 +35,13 @@ struct MessageHeader {
         uint32_t Sequence = 0;
     };
 
-/**
- * ESPressio Memory Audit
- * Members:
- * - Header (MessageHeader): 12 bytes [0 bytes dynamic allocation]
- * - T1 (uint64_t): 8 bytes [0 bytes dynamic allocation]
- * Total Memory: 20 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 struct RequestMessage {
         MessageHeader Header;
         uint64_t T1 = 0;
     };
 
-/**
- * ESPressio Memory Audit
- * Members:
- * - Header (MessageHeader): 12 bytes [0 bytes dynamic allocation]
- * - T1 (uint64_t): 8 bytes [0 bytes dynamic allocation]
- * - T2 (uint64_t): 8 bytes [0 bytes dynamic allocation]
- * - T3 (uint64_t): 8 bytes [0 bytes dynamic allocation]
- * Total Memory: 36 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 struct ResponseMessage {
         MessageHeader Header;
         uint64_t T1 = 0;
@@ -94,15 +49,7 @@ struct ResponseMessage {
         uint64_t T3 = 0;
     };
 
-/**
- * ESPressio Memory Audit
- * Members:
- * - Header (MessageHeader): 12 bytes [0 bytes dynamic allocation]
- * - ReferenceTransmitTime (uint64_t): 8 bytes [0 bytes dynamic allocation]
- * Total Memory: 20 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 struct AuthoritativeBroadcastMessage {
         MessageHeader Header;
         uint64_t ReferenceTransmitTime = 0;

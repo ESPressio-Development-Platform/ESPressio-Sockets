@@ -8,17 +8,7 @@
 namespace ESPressio::Sockets {
 
 #pragma pack(push, 1)
-/**
- * ESPressio Memory Audit
- * Members:
- * - Magic (uint32_t): 4 bytes [0 bytes dynamic allocation]
- * - Version (uint8_t): 1 bytes [0 bytes dynamic allocation]
- * - Reserved (uint8_t[3]): 3 bytes [0 bytes dynamic allocation]
- * - PayloadLength (uint32_t): 4 bytes [0 bytes dynamic allocation]
- * Total Memory: 12 bytes [0 bytes dynamic allocation]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * End ESPressio Memory Audit
- */
+
 struct SocketStateFrameHeader final {
     static constexpr uint32_t MagicValue = 0x4B535453u; // "STSK" on the wire
     static constexpr uint8_t VersionValue = 1;
@@ -35,16 +25,7 @@ static_assert(
     "SocketStateFrameHeader wire layout changed."
 );
 
-/**
- * ESPressio Memory Audit
- * Members:
- * - _maximumPayloadBytes (std::size_t): 4 bytes [0 bytes dynamic allocation]
- * - _buffer (std::vector<uint8_t>): 12 bytes [Capacity * (1 bytes) element storage]
- * Total Memory: 16 bytes [_buffer: Capacity * (1 bytes) element storage]
- * Basis: ESP32/Xtensa ILP32 reference ABI (4-byte pointers/size_t); ESPressio stateful allocators/deleters included; ABI-sensitive STL/platform internals are identified explicitly.
- * Confidence: medium; compile-time sizeof on the concrete target remains authoritative for ABI-sensitive/opaque members.
- * End ESPressio Memory Audit
- */
+
 class SocketStateFrameDecoder final {
 public:
     explicit SocketStateFrameDecoder(std::size_t maximumPayloadBytes = 4096)
