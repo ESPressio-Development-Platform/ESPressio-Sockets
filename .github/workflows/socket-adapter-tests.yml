@@ -1,0 +1,37 @@
+name: Socket Adapter neutral transport contracts
+
+on:
+  push:
+    branches: [primitives_redesign]
+  pull_request:
+
+jobs:
+  socket-adapter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: Sockets}
+      - uses: actions/checkout@v4
+        with: {repository: ESPressio-Development-Platform/ESPressio-Adapters, ref: primitives_redesign, path: Adapters}
+      - uses: actions/checkout@v4
+        with: {repository: ESPressio-Development-Platform/ESPressio-Primitive, ref: primitives_redesign, path: Primitive}
+      - uses: actions/checkout@v4
+        with: {repository: ESPressio-Development-Platform/ESPressio-System, ref: primitives_redesign, path: System}
+      - uses: actions/checkout@v4
+        with: {repository: ESPressio-Development-Platform/ESPressio-Task, ref: primitives_redesign, path: Task}
+      - name: Verify neutral Sockets A2 boundary
+        shell: bash
+        run: |
+          test -f Sockets/src/ESPressio_SocketAdapterTransport.hpp
+          if grep -E 'ESPressio_(Event|Command|State|Radio|Mesh)|std::function|std::vector' Sockets/src/ESPressio_SocketAdapterTransport.hpp; then
+            echo 'Neutral Socket Adapter transport acquired a forbidden family/transport/dynamic dependency.' >&2
+            exit 1
+          fi
+      - name: Build bounded socket Adapter contract
+        run: >-
+          g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -fno-rtti
+          -ISockets/src -IAdapters/src -IPrimitive/src -ISystem/src -ITask/src
+          Sockets/tests/socket_adapter_transport_test.cpp
+          -o socket_adapter_transport_test -pthread
+      - name: Run bounded socket Adapter contract
+        run: ./socket_adapter_transport_test
