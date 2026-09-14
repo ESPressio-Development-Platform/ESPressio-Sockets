@@ -1,52 +1,49 @@
-# ESPressio Dependency Chart — Current Released Generation
+# ESPressio Dependency Chart — Primitive redesign
 
-![ESPressio Library Dependency Chart](ESPRESSIO_DEPENDENCY_CHART.svg)
+This document records the final Sockets dependency position for Structural Tranche 9. Release-version history is intentionally excluded.
 
-## Released generation
-
-```text
-Observable
-Serializable
-Units
-Timing
-Threads
-Event
-Command
-Security
-Persistence
-Sockets
-ESP-Now
-WiFi
-Serial
-```
-
-## Sockets dependency position
+## Core package dependency position
 
 ```text
-Sockets
-    -> Observable main
-
-Sockets optional integrations
-    - - -> Event main
-    - - -> Command main
-    - - -> Security main
-    - - -> Timing main
+ESPressio-Sockets
+    -> ESPressio-System     primitives_redesign
+    -> ESPressio-Observable primitives_redesign
 ```
 
-Observable remains the only required ESPressio dependency of core Sockets. Event, Command, Security and Timing integrations remain opt-in.
+Security and Timing are explicit opt-in source integrations. Event, Command and State are no longer Sockets transport dependencies because their family semantics compose through generic Adapter bindings above the neutral transport.
 
-## Completed cascade
+## Neutral transport composition
 
 ```text
-Serializable
-    -> Units
-    -> Timing
-    -> Threads
-    -> Event
-    -> Command / Security
-    -> Persistence / Sockets / ESP-Now
-    -> WiFi
-    -> Serial
+Event / Command / State
+        |
+        v
+family Adapter bindings
+        |
+        v
+ESPressio-Adapters (A2)
+        |
+        v
+ESPressio-Sockets::SocketAdapterTransport
 ```
 
-Event has no reverse dependency on Sockets. Serial remains terminal/downstream; ESPressio Tree remains standalone.
+Optional genuine domain integrations:
+
+```text
+Sockets - - -> Security  (SocketSecuritySession / SocketSecurityDatagram)
+Sockets - - -> Timing    (bounded K1/K2 socket evidence protocol)
+```
+
+## Dependency-direction invariants
+
+```text
+Sockets core -> Event    NONE
+Sockets core -> Command  NONE
+Sockets core -> State    NONE
+
+Event   -> Sockets       NONE required by family runtime
+Command -> Sockets       NONE required by family runtime
+State   -> Sockets       NONE required by family runtime
+```
+
+WebSocket ownership remains in ESPressio-Web. Web may consume reusable socket/session mechanics without transferring Web protocol ownership back to Sockets.
