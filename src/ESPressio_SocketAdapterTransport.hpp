@@ -158,7 +158,11 @@ class SocketAdapterTransport final {
     bool BuildFrame(const SocketAdapterWire::Header& header,const std::uint8_t* payload,std::size_t payloadBytes,std::size_t& frameBytes) noexcept {
         if(payloadBytes>TMaximumFrameBytes-SocketAdapterWire::HeaderBytes||payloadBytes>std::numeric_limits<std::uint32_t>::max()) return false;
         auto actual=header; actual.PayloadBytes=static_cast<std::uint32_t>(payloadBytes); if(!SocketAdapterWire::EncodeHeader(actual,_tx.data(),_tx.size())) return false;
-        if(payloadBytes) std::memcpy(_tx.data()+SocketAdapterWire::HeaderBytes,payload,payloadBytes); frameBytes=SocketAdapterWire::HeaderBytes+payloadBytes; return true;
+        if(payloadBytes) {
+            std::memcpy(_tx.data()+SocketAdapterWire::HeaderBytes,payload,payloadBytes);
+        }
+        frameBytes=SocketAdapterWire::HeaderBytes+payloadBytes;
+        return true;
     }
     void MarkSessionPendingUnavailable(Session& session) noexcept {
         bool wake=false;
@@ -269,7 +273,10 @@ public:
     /// <summary>Publishes a connection/session availability transition and invalidates the old session generation.</summary>
     bool SetSessionAvailable(Adapters::AdapterRouteToken route,bool available) noexcept {
         auto* session=FindSession(route); if(!_frozen||!session) return false; if(session->Available==available) return true;
-        if(!available) MarkSessionPendingUnavailable(*session); if(!AdvanceSessionGeneration(*session)){ session->Available=false; return false; }
+        if(!available) {
+            MarkSessionPendingUnavailable(*session);
+        }
+        if(!AdvanceSessionGeneration(*session)){ session->Available=false; return false; }
         session->Available=available; ResetSessionStream(*session); _wake.Signal(); return true;
     }
     /// <summary>Wakes bounded service after an external socket implementation reports writable capacity.</summary>
@@ -290,7 +297,10 @@ public:
         if(static_cast<std::uint8_t>(service)>=Adapters::AdapterServiceClassCount||!(_serviceMask&(std::uint8_t{1}<<static_cast<std::uint8_t>(service)))) return {Adapters::LowerTransportDisposition::PermanentlyRejected,_generation,false};
         if(bytes.Size&&!bytes.Data) return {Adapters::LowerTransportDisposition::PermanentlyRejected,_generation,false};
         if(bytes.Size>TMaximumFrameBytes-SocketAdapterWire::HeaderBytes) return {Adapters::LowerTransportDisposition::PermanentlyRejected,_generation,false};
-        if(_txBusy.test_and_set(std::memory_order_acquire)) return {Adapters::LowerTransportDisposition::TemporarilyUnavailable,_generation,false}; FlagGuard tx(_txBusy);
+        if(_txBusy.test_and_set(std::memory_order_acquire)) {
+            return {Adapters::LowerTransportDisposition::TemporarilyUnavailable,_generation,false};
+        }
+        FlagGuard tx(_txBusy);
         OutboundPending* pending=nullptr; std::uint64_t correlation=0; const bool requireReceipt=policy.Evidence!=0;
         if(requireReceipt){ pending=ReserveOutbound(); if(!pending) return {Adapters::LowerTransportDisposition::ResourceUnavailable,_generation,false}; correlation=AllocateWireCorrelation(); if(!correlation){ *pending=OutboundPending{}; return {Adapters::LowerTransportDisposition::ResourceUnavailable,_generation,false}; }
             pending->Correlation=correlation; pending->Record=record; pending->Route=route; pending->TransportGeneration=_generation; pending->SessionGeneration=session->Generation; pending->Family=family; pending->Protocol=protocol; pending->Service=service; }
@@ -305,17 +315,31 @@ public:
 
     /// <summary>Admits one complete datagram frame through bounded envelope validation into A2.</summary>
     SocketAdapterFeedResult FeedDatagram(Adapters::AdapterRouteToken route,const std::uint8_t* bytes,std::size_t size) noexcept {
-        if(!_active.load(std::memory_order_acquire)) return {SocketAdapterFeedStatus::NotRunning,0}; auto* session=FindSession(route);
+        if(!_active.load(std::memory_order_acquire)) {
+            return {SocketAdapterFeedStatus::NotRunning,0};
+        }
+        auto* session=FindSession(route);
         if(!session||!session->Available||session->Mode!=SocketAdapterSessionMode::Datagram) return {SocketAdapterFeedStatus::Rejected,0};
         if(!bytes||size<SocketAdapterWire::HeaderBytes||size>TMaximumFrameBytes) return {SocketAdapterFeedStatus::Malformed,size};
-        if(session->RxBusy.test_and_set(std::memory_order_acquire)) return {SocketAdapterFeedStatus::Busy,0}; FlagGuard guard(session->RxBusy); return {ProcessFrame(*session,bytes,size),size};
+        if(session->RxBusy.test_and_set(std::memory_order_acquire)) {
+            return {SocketAdapterFeedStatus::Busy,0};
+        }
+        FlagGuard guard(session->RxBusy);
+        return {ProcessFrame(*session,bytes,size),size};
     }
 
     /// <summary>Consumes at most one complete stream frame per bounded ingress quantum.</summary>
     SocketAdapterFeedResult FeedStream(Adapters::AdapterRouteToken route,const std::uint8_t* bytes,std::size_t size) noexcept {
-        if(!_active.load(std::memory_order_acquire)) return {SocketAdapterFeedStatus::NotRunning,0}; auto* session=FindSession(route);
+        if(!_active.load(std::memory_order_acquire)) {
+            return {SocketAdapterFeedStatus::NotRunning,0};
+        }
+        auto* session=FindSession(route);
         if(!session||!session->Available||session->Mode!=SocketAdapterSessionMode::Stream) return {SocketAdapterFeedStatus::Rejected,0};
-        if((!bytes&&size)||session->RxBusy.test_and_set(std::memory_order_acquire)) return {SocketAdapterFeedStatus::Busy,0}; FlagGuard guard(session->RxBusy); std::size_t consumed=0;
+        if((!bytes&&size)||session->RxBusy.test_and_set(std::memory_order_acquire)) {
+            return {SocketAdapterFeedStatus::Busy,0};
+        }
+        FlagGuard guard(session->RxBusy);
+        std::size_t consumed=0;
         while(consumed<size){
             const std::size_t target=session->ExpectedBytes?session->ExpectedBytes:SocketAdapterWire::HeaderBytes; const std::size_t need=target-session->StreamBytes; const std::size_t take=(size-consumed)<need?(size-consumed):need;
             if(take){ std::memcpy(session->Stream.data()+session->StreamBytes,bytes+consumed,take); session->StreamBytes+=take; consumed+=take; }
@@ -331,15 +355,18 @@ public:
     bool ServiceOne() noexcept {
         if(!_active.load(std::memory_order_acquire)) return false;
         for(auto& receipt:_inboundReceipts){
-            if(!receipt.Used||!receipt.Ready) continue; auto* session=FindSession(receipt.Route);
+            if(!receipt.Used||!receipt.Ready) continue;
+            auto* session=FindSession(receipt.Route);
             if(!session||!session->Available||receipt.TransportGeneration!=_generation||receipt.SessionGeneration!=session->Generation){ receipt=InboundReceipt{}; return true; }
-            if(_txBusy.test_and_set(std::memory_order_acquire)) return false; FlagGuard tx(_txBusy);
+            if(_txBusy.test_and_set(std::memory_order_acquire)) return false;
+            FlagGuard tx(_txBusy);
             SocketAdapterWire::Header header{}; header.Kind=SocketAdapterFrameKind::AdmissionReceipt; header.Service=receipt.Service; header.Family=receipt.Family; header.Protocol=receipt.Protocol; header.Correlation=receipt.RemoteCorrelation;
             const std::uint8_t payload=static_cast<std::uint8_t>(receipt.Admission); std::size_t frameBytes=0; if(!BuildFrame(header,&payload,1,frameBytes)){ receipt=InboundReceipt{}; return true; }
             const auto wrote=session->Writer.Write(session->Writer.Owner,_tx.data(),frameBytes); if(wrote==SocketAdapterWriteDisposition::Accepted||wrote==SocketAdapterWriteDisposition::PermanentlyRejected){ receipt=InboundReceipt{}; return true; } return false;
         }
         for(auto& pending:_outbound){
-            if(!pending.Used||!pending.Ready) continue; if(pending.TransportGeneration!=_generation){ pending=OutboundPending{}; return true; }
+            if(!pending.Used||!pending.Ready) continue;
+            if(pending.TransportGeneration!=_generation){ pending=OutboundPending{}; return true; }
             Adapters::LowerTransportCompletion completion{}; completion.Record=pending.Record; completion.TransportGeneration=pending.TransportGeneration; completion.Disposition=pending.Disposition; completion.DestinationAdmission=pending.Admission; completion.HasDestinationAdmission=pending.HasAdmission;
             const auto result=_adapter?_adapter->CompleteTransport(completion):Adapters::AdapterSubmissionDisposition::NotRunning; if(result==Adapters::AdapterSubmissionDisposition::Busy) return false; pending=OutboundPending{}; return true;
         }
