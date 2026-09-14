@@ -10,20 +10,15 @@
 
 using namespace ESPressio;
 
-
 class Random final : public Security::IRandomSource {
 public:
     bool Fill(uint8_t* out, std::size_t size) override {
-        for (std::size_t i = 0; i < size; ++i) {
-            out[i] = static_cast<uint8_t>(++_next);
-        }
+        for (std::size_t i = 0; i < size; ++i) out[i] = static_cast<uint8_t>(++_next);
         return true;
     }
-
 private:
     uint8_t _next = 0;
 };
-
 
 class TestCipher final : public Security::IAeadCipher {
 public:
@@ -34,68 +29,44 @@ public:
     std::size_t TagSize() const noexcept override { return 16; }
 
     bool Seal(
-        const uint8_t* key,
-        std::size_t keySize,
-        const uint8_t* nonce,
-        std::size_t nonceSize,
-        const uint8_t* aad,
-        std::size_t aadSize,
-        const uint8_t* plaintext,
-        std::size_t plaintextSize,
-        std::vector<uint8_t>& ciphertext,
-        std::vector<uint8_t>& tag
+        const uint8_t* key, std::size_t keySize,
+        const uint8_t* nonce, std::size_t nonceSize,
+        const uint8_t* aad, std::size_t aadSize,
+        const uint8_t* plaintext, std::size_t plaintextSize,
+        uint8_t* ciphertext, std::size_t ciphertextCapacity,
+        uint8_t* tag, std::size_t tagCapacity
     ) override {
-        if (keySize != 16 || nonceSize != 12) {
-            return false;
-        }
+        if (keySize != 16 || nonceSize != 12 ||
+            ciphertext == nullptr || ciphertextCapacity < plaintextSize ||
+            tag == nullptr || tagCapacity < TagSize()) return false;
 
-        ciphertext.resize(plaintextSize);
         uint8_t hash = 0;
-        for (std::size_t i = 0; i < aadSize; ++i) {
-            hash ^= aad[i];
-        }
+        for (std::size_t i = 0; i < aadSize; ++i) hash ^= aad[i];
         for (std::size_t i = 0; i < plaintextSize; ++i) {
             ciphertext[i] = plaintext[i] ^ key[i % keySize] ^ nonce[i % nonceSize];
             hash ^= ciphertext[i];
         }
-        tag.assign(16, hash);
+        for (std::size_t i = 0; i < TagSize(); ++i) tag[i] = hash;
         return true;
     }
 
     bool Open(
-        const uint8_t* key,
-        std::size_t keySize,
-        const uint8_t* nonce,
-        std::size_t nonceSize,
-        const uint8_t* aad,
-        std::size_t aadSize,
-        const uint8_t* ciphertext,
-        std::size_t ciphertextSize,
-        const uint8_t* tag,
-        std::size_t tagSize,
-        std::vector<uint8_t>& plaintext
+        const uint8_t* key, std::size_t keySize,
+        const uint8_t* nonce, std::size_t nonceSize,
+        const uint8_t* aad, std::size_t aadSize,
+        const uint8_t* ciphertext, std::size_t ciphertextSize,
+        const uint8_t* tag, std::size_t tagSize,
+        uint8_t* plaintext, std::size_t plaintextCapacity
     ) override {
-        if (keySize != 16 || nonceSize != 12 || tagSize != 16) {
-            return false;
-        }
+        if (keySize != 16 || nonceSize != 12 || tagSize != TagSize() ||
+            plaintext == nullptr || plaintextCapacity < ciphertextSize) return false;
 
         uint8_t hash = 0;
-        for (std::size_t i = 0; i < aadSize; ++i) {
-            hash ^= aad[i];
-        }
-        for (std::size_t i = 0; i < ciphertextSize; ++i) {
-            hash ^= ciphertext[i];
-        }
-        for (std::size_t i = 0; i < tagSize; ++i) {
-            if (tag[i] != hash) {
-                return false;
-            }
-        }
-
-        plaintext.resize(ciphertextSize);
-        for (std::size_t i = 0; i < ciphertextSize; ++i) {
+        for (std::size_t i = 0; i < aadSize; ++i) hash ^= aad[i];
+        for (std::size_t i = 0; i < ciphertextSize; ++i) hash ^= ciphertext[i];
+        for (std::size_t i = 0; i < tagSize; ++i) if (tag[i] != hash) return false;
+        for (std::size_t i = 0; i < ciphertextSize; ++i)
             plaintext[i] = ciphertext[i] ^ key[i % keySize] ^ nonce[i % nonceSize];
-        }
         return true;
     }
 };
