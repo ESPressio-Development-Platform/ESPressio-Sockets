@@ -1,123 +1,193 @@
 # ESPressio Sockets
 
-Socket-oriented ESPressio transports, framing, Command adapters, State sessions, transport-security sessions, and System Clock synchronization providers for the ESPressio Development Platform.
+`ESPressio-Sockets` provides bounded, family-neutral socket/session transport mechanics for the ESPressio Development Platform.
 
-ESPressio Sockets owns **generic non-Web socket concerns** such as TCP, UDP and socket-oriented framing. Web protocols are owned by ESPressio-Web. Event semantics, Commands, State semantics, clock discipline and cryptography remain owned by their respective domain libraries.
+Sockets owns generic non-Web socket concerns: byte framing, stream/datagram session lifecycle, finite ingress/egress, backpressure, endpoint routing, optional ESPressio-Security session/datagram protection, and optional K1/K2 Timing exchange. Web protocols remain owned by `ESPressio-Web`.
 
-## Active working-branch architecture
+Event, Command and State representation/admission/execution semantics are **not** implemented as parallel Sockets family runtimes. Those families compose through generic Adapter bindings above this transport layer.
 
-The active working branch includes transport-neutral State integration and the platform-abstraction work for the coordinated structural redesign.
-
-Core Sockets remains portable and depends only on ESPressio-System and ESPressio-Observable. Event, Command, State, Timing and Security integrations remain opt-in and are kept out of the normal `ESPressio_Sockets.hpp` umbrella unless their specific integration headers are included.
-
-WebSocket ownership has moved to ESPressio-Web. Sockets no longer owns WebSocket clients/servers, WebSocket Event transports, WebSocket clock-synchronization wrappers, WebSocket routes, or WebSocket platform dependencies. Reusable transport-neutral protocol/session machinery may still be consumed by ESPressio-Web where appropriate.
-
-## Package
+## Final Tranche-9 ownership
 
 ```text
-ESPressio-Sockets
+Event / Command / State
+        |
+        v
+  family Adapter binding
+        |
+        v
+ESPressio-Adapters (A2)
+        |
+        v
+SocketAdapterTransport
+        |
+        v
+ caller-owned socket writer / connection
 ```
 
-The version is deliberately unchanged during the current platform restructuring.
+`SocketAdapterTransport` carries opaque family representation bytes plus the neutral service/family/protocol metadata and exact destination-admission receipt required by A2. It does not interpret Event occurrences, Command execution, State convergence or family retry policy.
 
-## Dependencies
+## Package dependencies
 
-Required by the active working branch:
+The core package dependency boundary is:
 
 ```text
-ESPressio System
-ESPressio Observable
+ESPressio-System
+ESPressio-Observable
 ```
 
-Optional integrations include:
+During the Primitive redesign tranche, dependency URLs use their matching `primitives_redesign` branches.
 
-```text
-Event
-Command
-State
-Security
-Timing
-```
+Security and Timing are optional source integrations and are compiled only when their integration headers are selected. Event, Command and State are not Sockets transport dependencies.
 
-Concrete platform network adapters are supplied by architecture packages such as ESPressio-ESP32. WebSocket implementations and WebSocket-specific primitive adapters are supplied through ESPressio-Web and its platform implementation.
-
-
-## Header structure and opt-in integrations
-
-The normal umbrella is:
+## Public umbrella
 
 ```cpp
 #include <ESPressio_Sockets.hpp>
 ```
 
-It deliberately does not pull in Event-, Command-, State-, Security- or Timing-specific adapters.
+The core umbrella exposes portable socket types, worker infrastructure and stream helpers. Family-specific Event/Command/State transport stacks are intentionally absent.
 
-## State integration
+The neutral A2 lower transport is explicit:
 
-`SocketStateSession` is a transport-neutral State session layered over a caller-supplied byte transport. Sockets owns framing and connection/session adaptation; ESPressio-State owns contracts, publishers, subscriptions, remote repositories, epochs/revisions, acknowledgement semantics and State protocol meaning.
+```cpp
+#include <ESPressio_SocketAdapterTransport.hpp>
+```
 
-A session binds an authoritative `StatePublisher`, a `RemoteStateManager`, and a `StateSubscriptionRegistry` to a send callback. Received stream bytes are passed to `session.Feed(...)`; framing supports fragmented stream delivery and rejects messages exceeding configured bounds.
+Optional integration surfaces include:
 
-The integration preserves State ownership: local subscriptions are propagated, accepted subscriptions can yield immediate authoritative snapshots, later publications update remote repositories, acknowledgements preserve epoch/revision semantics, and teardown does not introduce a reverse dependency from State to Sockets.
+```cpp
+#include <ESPressio_SocketSecuritySession.hpp>
+#include <ESPressio_SocketSecurityDatagram.hpp>
+#include <ESPressio_SocketClockSynchronization.hpp>
+```
 
-## Event transports
+## Neutral Adapter transport
 
-Socket-oriented ESPressio Event transport adapters cover mechanisms owned by the socket/platform layer, including UDP, TCP and TLS. MQTT remains a separate concrete network adapter where enabled.
+`SocketAdapterTransport` is compile-time bounded:
 
-WebSocket Event transport is **not** owned by Sockets; it is provided by ESPressio-Web and binds to an application-published WebSocket endpoint/client.
+```cpp
+using Transport = ESPressio::Sockets::SocketAdapterTransport<
+    AdapterRuntime,
+    MaximumSessions,
+    MaximumPendingOutbound,
+    MaximumPendingInboundReceipts,
+    MaximumFrameBytes
+>;
+```
 
-Event routing, identity, serialization and hop/origin semantics remain owned by ESPressio-Event.
+All four capacities are part of the Type. The transport owns fixed session/correlation tables, one fixed TX framing workspace, and one fixed stream-assembly buffer per session. It does not fall back to an unbounded queue when those capacities are exhausted.
 
-Sockets-owned Observable lifecycle bridges remain available through their specific integration headers.
+A session is bound before configuration freezes:
 
-## Command integration
+```cpp
+Transport transport(adapterRuntime, policyResolver, serviceWake);
 
-`SocketCommandSession` and socket server adapters allow an ESPressio Command tree to be invoked over byte-oriented socket connections. `SocketCommandSession` intentionally remains transport-neutral: inbound bytes are supplied through `Feed(...)` and outbound bytes through a caller-provided writer.
+transport.BindSession(
+    {routeToken},
+    Sockets::SocketAdapterSessionMode::Datagram,
+    writer,
+    provenance,
+    true
+);
 
-This makes the session reusable by ESPressio-Web without making Sockets own WebSocket protocol or routing semantics.
+transport.Freeze();
+transport.Start();
+```
 
-## Clock synchronization
+`writer` is a `SocketAdapterWriter` supplied by the concrete connection/session owner. The neutral transport never opens an operating-system socket on behalf of a Primitive family.
 
-Optional Timing integration carries clock-synchronization exchanges while Timing remains responsible for sample validation, estimation and System Clock discipline.
+For stream connections, feed arbitrary byte chunks through `FeedStream(...)`; the transport keeps one bounded assembly buffer per frozen session. Datagram transports use `FeedDatagram(...)` and require one complete frame per datagram.
 
-`SocketClockSynchronizationProtocol` remains in Sockets because its binary exchange protocol is reusable across socket transports and Web adapters. Its portable configuration/types are separated from UDP-specific `IPAddress` configuration so consumers such as ESPressio-Web do not inherit platform-specific UDP types.
+## Exact destination admission
 
-TCP and UDP synchronization providers remain in Sockets. WebSocket clock synchronization is provided by ESPressio-Web and reuses the portable protocol.
+A Primitive-family policy may require `DestinationPrimitiveAdmission`. Sockets carries an exact bounded admission receipt rather than treating successful socket write/delivery as family admission.
 
-## Transport Security
-
-`SocketSecuritySession` and `SocketSecurityDatagram` bind stream/datagram semantics to ESPressio-Security without implementing cryptography themselves.
-
-TLS and ESPressio-Security protect different boundaries: TLS protects a connection/session; ESPressio-Security protects application transport payloads with protocol binding, sender/session identity and replay semantics.
-
-## Observable lifecycle
-
-Sockets exposes synchronous Observable lifecycle surfaces for socket infrastructure. Applications requiring asynchronous Event representations can opt into the Sockets-owned Event bridges.
-
-## Architectural guarantees
-
-- core Sockets remains portable;
-- Sockets owns generic non-Web socket concerns, not Web protocols;
-- WebSocket ownership resides in ESPressio-Web;
-- Event, Command, State, Timing and Security integrations remain opt-in;
-- the normal umbrella remains independent of optional domain integrations;
-- State retains ownership of State-domain protocol/revision/subscription semantics;
-- target-specific network implementation is supplied through ESPressio platform providers rather than reusable Sockets code;
-- no backwards-compatibility forwarding header is retained for concrete socket Event transports during this forward-moving development tranche.
-
-The dependency direction remains:
+Only these destination dispositions establish admission evidence:
 
 ```text
-Sockets Event integration - - -> Event
-Sockets Command integration - - -> Command
-Sockets State integration - - -> State
-Sockets Security integration - - -> Security
-Sockets Timing integration - - -> Timing
-
-Web may consume transport-neutral Sockets protocol/session machinery
-without transferring WebSocket ownership back to Sockets.
+Accepted
+AlreadyAccepted
 ```
+
+`TemporarilyUnavailable`, `ResourceUnavailable`, `Unsupported`, `Rejected` and `Malformed` remain exact non-establishing results.
+
+A successful socket write therefore means only that the lower transport accepted the framed bytes. It does not by itself establish Event/Command/State admission.
+
+## Lifecycle and stale completion safety
+
+Every transport and bound session has a finite lifecycle generation.
+
+- `Quiesce()` rejects new work and resolves/releases transport-owned volatile correlation state.
+- `Restart(...)` advances the transport generation.
+- session availability changes advance the session generation where required.
+- late admission receipts or inbound completions from a previous transport/session generation are rejected as stale.
+- correlation counters fail closed at exhaustion rather than wrapping into current work.
+- temporary writer backpressure remains a bounded transport result; it is not converted into a hidden retry worker.
+
+## Backpressure and concurrency
+
+The transport deliberately uses finite contention points:
+
+- one TX workspace protected by `atomic_flag`;
+- at most one parser per session at a time;
+- `TMaximumPendingOutbound` exact-M1 correlations;
+- `TMaximumPendingInboundReceipts` destination-receipt correlations;
+- one `TMaximumFrameBytes` stream buffer per session.
+
+When the writer or a finite transport resource cannot accept work, the lower transport returns the corresponding bounded availability/resource disposition to A2.
+
+## Socket worker
+
+`SocketWorker` remains generic socket lifecycle/maintenance infrastructure. Its synchronous Observable observer surface reports worker lifecycle state without manufacturing application Event traffic. It is not an Event/Command/State executor.
+
+## Security
+
+`SocketSecuritySession` and `SocketSecurityDatagram` adapt stream/datagram bytes to `ESPressio-Security` without implementing cryptography themselves.
+
+TLS and ESPressio-Security protect different boundaries: TLS protects a connection/session; ESPressio-Security protects application transport payloads with its own protocol binding, sender/session identity and replay semantics.
+
+## K1/K2 Timing evidence
+
+`SocketClockSynchronizationProtocol` implements one bounded network clock evidence exchange. It carries the required T1/T2/T3/T4 coordinates together with capture quality, conservative uncertainty and reference reliability.
+
+Timing remains responsible for:
+
+- deciding when evidence is due;
+- validating evidence quality;
+- affine estimation;
+- qualification/holdover;
+- clock discipline;
+- source switching and uncertainty propagation.
+
+Sockets does not reconstruct historical synchronized System time and does not run a fixed-cadence clock discipline loop.
+
+## Removed predecessor family stacks
+
+The following old Sockets-owned family runtimes are intentionally absent from the final Tranche-9 source tree:
+
+```text
+SocketEvent* transports / Event bridges
+SocketCommandProtocol / SocketCommandSession / TCPCommandServer
+SocketState* sessions / TCPStateClient / TCPStateServer
+family-specific socket retry/execution stacks
+```
+
+Applications should use the generic Event/Command/State Adapter bindings and bind A2 to `SocketAdapterTransport` rather than recreating those removed paths.
+
+## WebSocket ownership
+
+WebSocket protocol/routes/clients/servers remain owned by `ESPressio-Web`. Web may consume reusable Sockets byte/session mechanics where appropriate, but Sockets does not reclaim Web protocol ownership.
 
 ## Testing
 
-Host and target validation exercise core socket facilities and optional integrations. WebSocket-specific validation is now the responsibility of ESPressio-Web and the appropriate concrete platform package.
+The redesign branch validates:
+
+- neutral A2 socket transport and exact-M1 carriage;
+- stream/datagram framing and bounded recovery;
+- lifecycle generation and stale receipt/completion rejection;
+- deterministic congestion/backpressure behavior;
+- Security session/datagram integration;
+- K1/K2 Timing protocol behavior;
+- package and predecessor-eradication dependency guards.
+
+All redesign dependency checkouts used by the Tranche-9 workflows target `primitives_redesign`.
