@@ -35,3 +35,11 @@ jobs:
           -o socket_adapter_transport_test -pthread
       - name: Run bounded socket Adapter contract
         run: ./socket_adapter_transport_test
+      - name: Build socket congestion and malformed-input hardening contract
+        run: >-
+          g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -fno-rtti
+          -ISockets/src -IAdapters/src -IPrimitive/src -ISystem/src -ITask/src
+          Sockets/tests/socket_adapter_hardening_test.cpp
+          -o socket_adapter_hardening_test -pthread
+      - name: Run socket congestion and malformed-input hardening contract
+        run: ./socket_adapter_hardening_test
