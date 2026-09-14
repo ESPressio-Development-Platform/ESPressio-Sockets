@@ -10,25 +10,41 @@ jobs:
     steps:
       - name: Checkout Sockets
         uses: actions/checkout@v4
-      - name: Verify core Sockets remains integration-light
+      - name: Verify family-neutral Sockets boundary
+        shell: bash
         run: |
-          if grep -nE '#[[:space:]]*include[[:space:]]*[<\"]ESPressio_(Event|Command|Security|Timing|SocketWorkerEventBridge|SocketSecuritySessionEventBridge)' src/ESPressio_Sockets.hpp; then
-            echo 'Core Sockets umbrella must not acquire optional integration headers.'
+          if grep -nE '#[[:space:]]*include[[:space:]]*[<\"]ESPressio_(Event|Command|State|SocketEvent|SocketCommand|SocketState|SocketWorkerEventBridge|SocketSecuritySessionEventBridge)' src/ESPressio_Sockets.hpp; then
+            echo 'Core Sockets umbrella must remain family-neutral.' >&2
             exit 1
           fi
+          for file in \
+            src/ESPressio_SocketEventFrame.hpp \
+            src/ESPressio_SocketEvents.hpp \
+            src/ESPressio_SocketWorkerEventBridge.hpp \
+            src/ESPressio_SocketWorkerEvents.hpp \
+            src/ESPressio_SocketSecuritySessionEventBridge.hpp \
+            src/ESPressio_SocketSecuritySessionEvents.hpp \
+            src/ESPressio_SocketCommandProtocol.hpp \
+            src/ESPressio_SocketCommandSession.hpp \
+            src/ESPressio_SocketCommandTypes.hpp \
+            src/ESPressio_TCPCommandServer.hpp \
+            src/ESPressio_SocketState.hpp \
+            src/ESPressio_SocketStateFrame.hpp \
+            src/ESPressio_SocketStateSession.hpp \
+            src/ESPressio_TCPStateClient.hpp \
+            src/ESPressio_TCPStateServer.hpp; do
+            if test -e "$file"; then
+              echo "Superseded family stack remains: $file" >&2
+              exit 1
+            fi
+          done
       - name: Checkout ESPressio System working branch
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-System
           ref: primitives_redesign
           path: deps/ESPressio-System
-      - name: Checkout ESPressio Command 1.0.3
-        uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Command
-          ref: primitives_redesign
-          path: deps/ESPressio-Command
-      - name: Checkout ESPressio Security 0.4.2
+      - name: Checkout ESPressio Security working branch
         uses: actions/checkout@v4
         with:
           repository: ESPressio-Development-Platform/ESPressio-Security
@@ -56,7 +72,6 @@ jobs:
         run: >-
           cmake -S tests -B build
           -DESPRESSIO_SYSTEM_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-System/src"
-          -DESPRESSIO_COMMAND_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Command/src"
           -DESPRESSIO_SECURITY_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Security/src"
           -DESPRESSIO_TIMING_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Timing/src"
           -DESPRESSIO_UNITS_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Units/src"
@@ -65,164 +80,3 @@ jobs:
         run: cmake --build build --parallel
       - name: Test
         run: ctest --test-dir build --output-on-failure
-
-  esp32-command-integration:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: project/ESPressio-Sockets
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Observable
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Command
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Command
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-      - name: Install PlatformIO
-        run: pip install platformio
-      - name: Create Socket Command integration compile project
-        shell: bash
-        run: |
-          mkdir -p project/compile/src
-          cat > project/compile/platformio.ini <<'EOF'
-          [env:esp32]
-          platform = espressif32
-          board = esp32dev
-          framework = arduino
-          build_flags = -std=gnu++17 -frtti
-          build_unflags = -std=gnu++11 -fno-rtti
-          lib_ldf_mode = deep+
-          lib_deps =
-              ../dependencies/ESPressio-Observable
-              ../dependencies/ESPressio-Command
-              ../ESPressio-Sockets
-          EOF
-          cat > project/compile/src/main.cpp <<'EOF'
-          #include <Arduino.h>
-          #include <ESPressio_SocketCommandProtocol.hpp>
-          #include <ESPressio_SocketCommandSession.hpp>
-          void setup() {
-              ESPressio::Sockets::SocketCommandInvocationContext request;
-              request.Metadata.RequestID = 1;
-              request.Invocation.path = {"gpio", "write"};
-              request.Invocation.named["pin"] = 2;
-              request.Invocation.named["state"] = true;
-              std::vector<uint8_t> encoded;
-              ESPressio::Sockets::SocketCommandProtocol::EncodeRequest(request, encoded);
-          }
-          void loop() {}
-          EOF
-      - name: Compile Socket Command integration against Command 1.0.3
-        run: pio run -d project/compile
-
-  esp32-event-integration:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: project/ESPressio-Sockets
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-System
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-System
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Observable
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Observable
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Units
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Units
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Timing
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Timing
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Task
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Task
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Threads
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Threads
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Security
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Security
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Event
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Event
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-WiFi
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-WiFi
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-Persistence
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-Persistence
-      - uses: actions/checkout@v4
-        with:
-          repository: ESPressio-Development-Platform/ESPressio-ESP32
-          ref: primitives_redesign
-          path: project/dependencies/ESPressio-ESP32
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-      - name: Install PlatformIO
-        run: pip install platformio
-      - name: Create Socket Event integration compile project
-        shell: bash
-        run: |
-          mkdir -p project/compile/src
-          cat > project/compile/platformio.ini <<'EOF'
-          [env:esp32]
-          platform = espressif32
-          board = esp32dev
-          framework = arduino
-          build_flags = -std=gnu++17 -frtti
-          build_unflags = -std=gnu++11 -fno-rtti
-          lib_ldf_mode = deep+
-          lib_deps =
-              ../dependencies/ESPressio-System
-              ../dependencies/ESPressio-Observable
-              ../dependencies/ESPressio-Units
-              ../dependencies/ESPressio-Timing
-              ../dependencies/ESPressio-Task
-              ../dependencies/ESPressio-Threads
-              ../dependencies/ESPressio-Security
-              ../dependencies/ESPressio-Event
-              ../dependencies/ESPressio-WiFi
-              ../dependencies/ESPressio-Persistence
-              ../ESPressio-Sockets
-              ../dependencies/ESPressio-ESP32
-          EOF
-          cat > project/compile/src/main.cpp <<'EOF'
-          #include <Arduino.h>
-          #include <ESPressio_SocketEvents.hpp>
-          #include <ESPressio_SocketWorkerEventBridge.hpp>
-          #include <ESPressio_SocketSecuritySessionEventBridge.hpp>
-          #include <ESPressio_TCPClientEventTransport.hpp>
-          #include <ESPressio_TCPServerEventTransport.hpp>
-          void setup() {}
-          void loop() {}
-          EOF
-      - name: Compile TCP Socket Event adapters against coordinated abstraction branches
-        run: pio run -d project/compile

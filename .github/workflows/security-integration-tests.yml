@@ -16,11 +16,6 @@ jobs:
           path: deps/ESPressio-System
       - uses: actions/checkout@v4
         with:
-          repository: ESPressio-Development-Platform/ESPressio-Command
-          ref: primitives_redesign
-          path: deps/ESPressio-Command
-      - uses: actions/checkout@v4
-        with:
           repository: ESPressio-Development-Platform/ESPressio-Security
           ref: primitives_redesign
           path: deps/ESPressio-Security
@@ -43,7 +38,6 @@ jobs:
         run: >-
           cmake -S tests -B build
           -DESPRESSIO_SYSTEM_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-System/src"
-          -DESPRESSIO_COMMAND_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Command/src"
           -DESPRESSIO_SECURITY_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Security/src"
           -DESPRESSIO_TIMING_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Timing/src"
           -DESPRESSIO_UNITS_INCLUDE_DIR="$GITHUB_WORKSPACE/deps/ESPressio-Units/src"

@@ -8,7 +8,6 @@
 
 namespace ESPressio::Sockets {
 
-
 struct IPv4Address {
     std::array<uint8_t, 4> Octets{};
 
@@ -33,7 +32,6 @@ struct IPv4Address {
     }
 };
 
-
 struct SocketEndpoint {
     IPv4Address Address;
     uint16_t Port = 0;
@@ -55,17 +53,12 @@ struct SocketEndpoint {
     }
 };
 
-
 struct SocketWorkerConfig {
     uint32_t StackSize = 4096;
     uint32_t Priority = 2;
     System::ProcessorAffinity Affinity = System::ProcessorAffinity::Any();
     uint32_t IdleDelayMilliseconds = 2;
 };
-
-#ifndef ESPRESSIO_SOCKETS_MAX_EVENT_PACKET_SIZE
-    #define ESPRESSIO_SOCKETS_MAX_EVENT_PACKET_SIZE 65536
-#endif
 
 #ifndef ESPRESSIO_SOCKETS_MAX_UDP_DESTINATIONS
     #define ESPRESSIO_SOCKETS_MAX_UDP_DESTINATIONS 16
