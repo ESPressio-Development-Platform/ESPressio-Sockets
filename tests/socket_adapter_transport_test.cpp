@@ -159,9 +159,35 @@ int main() {
     const auto generation=left.Generation();
     left.Quiesce();
     assert(!left.IsActive());
+    auto quiescedSubmit=left.Submit(
+        Record(5),1,1,withEvidence,Adapters::AdapterServiceClass::Responsive,
+        {evidencePayload,sizeof(evidencePayload)},{1});
+    assert(quiescedSubmit.Disposition==Adapters::LowerTransportDisposition::TemporarilyUnavailable);
+    assert(!quiescedSubmit.DeferredCompletion);
+    assert(left.FeedDatagram({1},staleReceipt.data(),Sockets::SocketAdapterWire::HeaderBytes+1).Status==Sockets::SocketAdapterFeedStatus::NotRunning);
     assert(left.Restart(leftAdapter));
     assert(left.Generation()==generation+1);
     assert(left.FeedDatagram({1},staleReceipt.data(),Sockets::SocketAdapterWire::HeaderBytes+1).Status==Sockets::SocketAdapterFeedStatus::Rejected);
+
+    auto staleInboundSend=left.Submit(
+        Record(6),1,1,withEvidence,Adapters::AdapterServiceClass::Responsive,
+        {evidencePayload,sizeof(evidencePayload)},{1});
+    assert(staleInboundSend.Disposition==Adapters::LowerTransportDisposition::Accepted);
+    assert(staleInboundSend.DeferredCompletion);
+    assert(right.FeedDatagram({1},leftWire.Bytes.data(),leftWire.Bytes.size()).Status==Sockets::SocketAdapterFeedStatus::Accepted);
+    const auto staleInboundTarget=rightAdapter.InboundCompletion;
+    const auto staleInboundCorrelation=rightAdapter.InboundCorrelation;
+    const auto rightGeneration=right.Generation();
+    right.Quiesce();
+    assert(!right.IsActive());
+    assert(right.Restart(rightAdapter));
+    assert(right.Generation()==rightGeneration+1);
+    Adapters::AdapterInboundCompletion staleInbound{};
+    staleInbound.Correlation=staleInboundCorrelation;
+    staleInbound.Admission=Primitive::PrimitiveAdmissionDisposition::Accepted;
+    staleInboundTarget.Complete(staleInboundTarget.Owner,staleInbound);
+    assert(!right.ServiceOne());
+    left.Cancel(Record(6));
 
     FakeAdapter streamAdapter;
     Wire streamWire;
@@ -170,7 +196,7 @@ int main() {
     assert(stream.Freeze());
     assert(stream.Start());
     auto streamSend=stream.Submit(
-        Record(5),1,1,noEvidence,Adapters::AdapterServiceClass::BestEffort,
+        Record(7),1,1,noEvidence,Adapters::AdapterServiceClass::BestEffort,
         {noEvidencePayload,sizeof(noEvidencePayload)},{2});
     assert(streamSend.Disposition==Adapters::LowerTransportDisposition::Accepted);
     auto first=stream.FeedStream({2},streamWire.Bytes.data(),10);
