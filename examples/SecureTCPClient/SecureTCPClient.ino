@@ -16,7 +16,7 @@ WiFiClient client;
 Security::AES256GCMCipher cipher;
 Security::AeadCipherRegistry ciphers;
 Security::StaticKeyProvider keys;
-Security::ESP32RandomSource randomSource;
+Security::RandomSource randomSource;
 Security::TransportSecurity* security = nullptr;
 Sockets::SocketSecuritySession* secureSession = nullptr;
 
