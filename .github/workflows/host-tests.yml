@@ -38,6 +38,20 @@ jobs:
               exit 1
             fi
           done
+      - name: Verify package metadata matches neutral boundary
+        shell: bash
+        run: |
+          grep -q '"name": "ESPressio-System"' library.json
+          grep -q '"name": "ESPressio-Observable"' library.json
+          grep -q '^depends=ESPressio-System,ESPressio-Observable$' library.properties
+          if grep -Ei 'PubSubClient|Event Transport|Command invocation|State sessions' library.json library.properties; then
+            echo 'Sockets package metadata reintroduced a removed family transport/dependency claim.' >&2
+            exit 1
+          fi
+          if grep -E '#(structural_realignment|main)("|$)' library.json; then
+            echo 'Sockets redesign dependency references must remain on primitives_redesign.' >&2
+            exit 1
+          fi
       - name: Checkout ESPressio System working branch
         uses: actions/checkout@v4
         with:
